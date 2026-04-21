@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   CATEGORY_META,
   CATEGORY_ORDER,
@@ -237,22 +237,6 @@ export function SpendOverviewClient({
   const router = useRouter();
   const pathname = usePathname();
   const [monthKey, setMonthKey] = useState<MonthKey>(initialMonthKey);
-  const monthScrollRef = useRef<HTMLDivElement>(null);
-  const selectedMonthRef = useRef<HTMLButtonElement>(null);
-
-  // Scroll to selected month on mount and when month changes
-  useEffect(() => {
-    if (selectedMonthRef.current && monthScrollRef.current) {
-      const container = monthScrollRef.current;
-      const button = selectedMonthRef.current;
-      const containerRect = container.getBoundingClientRect();
-      const buttonRect = button.getBoundingClientRect();
-      
-      // Calculate scroll position to center the selected month
-      const scrollLeft = button.offsetLeft - container.offsetLeft - (containerRect.width / 2) + (buttonRect.width / 2);
-      container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
-    }
-  }, [monthKey]);
 
   const insight = useMemo(() => getSpendInsight(monthKey), [monthKey]);
   const { snapshot, previousMonthLabel, totalMom, categoryMom } = insight;
@@ -313,14 +297,10 @@ export function SpendOverviewClient({
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
             Month
           </p>
-          <div 
-            ref={monthScrollRef}
-            className="mt-2 flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {MONTHS.map((m) => (
+          <div className="mt-2 flex flex-row-reverse gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {[...MONTHS].reverse().map((m) => (
               <button
                 key={m.key}
-                ref={m.key === monthKey ? selectedMonthRef : undefined}
                 type="button"
                 onClick={() => {
                   setMonthKey(m.key);
