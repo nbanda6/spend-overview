@@ -3,7 +3,7 @@ import { ICICI, spendCardClass } from "@/lib/icici-spend";
 
 const SERVICE_LIST = [
   {
-    href: "/spend-overview",
+    href: "/spend-overview?from=services",
     title: "Spend Overview",
     subtitle: "Track spends by category",
     icon: "donut" as const,

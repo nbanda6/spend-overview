@@ -11,7 +11,7 @@ import { TransactionDetailClient } from "./transaction-detail-client";
 
 type PageProps = {
   params: Promise<{ category: string; txId: string }>;
-  searchParams: Promise<{ m?: string }>;
+  searchParams: Promise<{ m?: string; from?: string }>;
 };
 
 export default async function TransactionDetailPage({
@@ -19,7 +19,7 @@ export default async function TransactionDetailPage({
   searchParams,
 }: PageProps) {
   const { category, txId } = await params;
-  const { m } = await searchParams;
+  const { m, from } = await searchParams;
 
   const slug = category as CategorySlug;
   if (!CATEGORY_META[slug]) notFound();
@@ -27,6 +27,8 @@ export default async function TransactionDetailPage({
   const monthKey = MONTH_KEYS.includes(m as MonthKey)
     ? (m as MonthKey)
     : DEFAULT_MONTH;
+
+  const fromSource = from ?? "services";
 
   const txIndex = parseInt(txId, 10);
   const rows = TRANSACTIONS_BY_MONTH[monthKey][slug];
@@ -43,6 +45,7 @@ export default async function TransactionDetailPage({
       monthKey={monthKey}
       transaction={transaction}
       txIndex={txIndex}
+      fromSource={fromSource}
     />
   );
 }

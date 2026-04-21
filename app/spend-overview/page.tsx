@@ -9,11 +9,12 @@ export const metadata = {
 export default async function SpendOverviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ m?: string }>;
+  searchParams: Promise<{ m?: string; from?: string }>;
 }) {
-  const { m } = await searchParams;
+  const { m, from } = await searchParams;
   const monthKey = parseMonthKey(m);
+  const backHref = from === "home" ? "/" : "/services";
   return (
-    <SpendOverviewClient key={monthKey} initialMonthKey={monthKey} />
+    <SpendOverviewClient key={monthKey} initialMonthKey={monthKey} backHref={backHref} fromSource={from ?? "services"} />
   );
 }

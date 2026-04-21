@@ -16,11 +16,13 @@ export function TransactionDetailClient({
   monthKey,
   transaction,
   txIndex,
+  fromSource,
 }: {
   slug: CategorySlug;
   monthKey: MonthKey;
   transaction: TxRow;
   txIndex: number;
+  fromSource: string;
 }) {
   const cat = CATEGORY_META[slug];
   const monthLabel = MONTHS.find((x) => x.key === monthKey)?.label ?? monthKey;
@@ -44,7 +46,7 @@ export function TransactionDetailClient({
         }}
       >
         <Link
-          href={`/spend-overview/${slug}?m=${monthKey}`}
+          href={`/spend-overview/${slug}?m=${monthKey}&from=${fromSource}`}
           className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10"
           aria-label="Back to Transactions"
         >

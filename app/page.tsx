@@ -8,7 +8,7 @@ const GRID_ITEMS = [
   { lines: ["Pay Bills &", "Recharge"], icon: "bill", href: "#" },
   { lines: ["Get Instant", "Loans/Offers"], icon: "loan", href: "#" },
   { lines: ["Accounts &", "FD/RD"], icon: "accounts", href: "#" },
-  { lines: ["Spends", "Overview"], icon: "spends", href: "/spend-overview" },
+  { lines: ["Spends", "Overview"], icon: "spends", href: "/spend-overview?from=home" },
   { lines: ["Loans"], icon: "loan", href: "#" },
   { lines: ["Demat/Mutual", "Funds"], icon: "demat", href: "#" },
   { lines: ["UPI", "Payments"], icon: "upi", href: "#" },

@@ -9,7 +9,7 @@ import {
 
 type Props = {
   params: Promise<{ category: string }>;
-  searchParams: Promise<{ m?: string }>;
+  searchParams: Promise<{ m?: string; from?: string }>;
 };
 
 export async function generateMetadata({ params }: Props) {
@@ -22,9 +22,10 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function CategoryDrillPage({ params, searchParams }: Props) {
   const { category } = await params;
-  const { m } = await searchParams;
+  const { m, from } = await searchParams;
   if (!isCategorySlug(category)) notFound();
+  const fromSource = from ?? "services";
   return (
-    <CategoryDrillClient slug={category} monthKey={parseMonthKey(m)} />
+    <CategoryDrillClient slug={category} monthKey={parseMonthKey(m)} fromSource={fromSource} />
   );
 }
