@@ -3,8 +3,6 @@ import { ImobileBottomNav } from "@/app/components/imobile-bottom-nav";
 import { GridIcon } from "@/app/components/home-grid-icons";
 import { ICICI_LIGHT } from "@/app/theme/icici-light";
 
-const TABS = ["Statement", "Manage", "Spends", "Mutual"] as const;
-
 const GRID_ITEMS = [
   { lines: ["Send Money"], icon: "transfer", href: "#" },
   { lines: ["Pay Bills &", "Recharge"], icon: "bill", href: "#" },
@@ -121,42 +119,6 @@ export default function HomePage() {
               <ChevronRight className="opacity-80" />
             </button>
           </div>
-
-          <div
-            className="mt-5 flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            role="tablist"
-            aria-label="Portfolio sections"
-          >
-            {TABS.map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                role="tab"
-                aria-selected={tab === "Spends"}
-                className={`shrink-0 rounded-full px-4 py-2 text-[12px] font-semibold transition ${
-                  tab === "Spends"
-                    ? "bg-white text-[#E85A28] shadow-md"
-                    : "text-white/90 ring-1 ring-white/35 hover:bg-white/10"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Assistance banner */}
-        <div className="bg-white px-4 pb-2 pt-4 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
-          <Link
-            href="#"
-            className="flex items-center justify-between rounded-2xl px-4 py-3.5 text-white shadow-md transition active:scale-[0.99]"
-            style={{
-              background: `linear-gradient(90deg, ${ICICI_LIGHT.orange} 0%, ${ICICI_LIGHT.orangeDark} 100%)`,
-            }}
-          >
-            <span className="text-[13px] font-semibold">Need help? 1800 1080</span>
-            <ChevronRight className="text-white/90" />
-          </Link>
         </div>
 
         {/* Service grid */}
