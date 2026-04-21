@@ -21,14 +21,6 @@ export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
         aria-hidden
       />
 
-      {/* Label above phone */}
-      <div className="mb-2 text-center sm:mb-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-600/90">
-          Prototype
-        </p>
-        <p className="mt-0.5 text-xs font-semibold text-zinc-700">iPhone 17 Pro</p>
-      </div>
-
       {/* Phone outer bezel - titanium frame */}
       <div
         className="relative w-full max-w-[430px] shrink-0 rounded-[54px] p-[9px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5),0_0_0_1px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.08)]"
@@ -96,11 +88,6 @@ export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </div>
-
-      {/* Footer text */}
-      <p className="mt-5 max-w-sm px-4 text-center text-[10px] leading-relaxed text-zinc-600/90 sm:mt-6">
-        Interactive preview · Not affiliated with Apple Inc. or ICICI Bank.
-      </p>
     </div>
   );
 }
