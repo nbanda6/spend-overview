@@ -1,10 +1,11 @@
 /**
  * iPhone 17 dimensions: 150mm (H) x 71.9mm (W)
- * Scaled to logical pixels for prototyping (~5.58px per mm)
+ * Aspect ratio: 2.086:1 (height to width)
+ * Screen logical pixels based on standard iOS scaling
  */
 const IPHONE_17 = {
-  widthPx: 401,
-  heightPx: 837,
+  widthPx: 375,
+  heightPx: 812,
 } as const;
 
 export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
@@ -22,7 +23,7 @@ export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
 
       {/* Phone outer bezel - titanium frame */}
       <div
-        className="relative w-full max-w-[423px] shrink-0 rounded-[52px] p-[9px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5),0_0_0_1px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.08)]"
+        className="relative w-full max-w-[393px] shrink-0 rounded-[50px] p-[8px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5),0_0_0_1px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.08)]"
         style={{
           background:
             "linear-gradient(160deg, #4a4a4c 0%, #3a3a3c 15%, #2c2c2e 45%, #1c1c1e 100%)",
@@ -30,7 +31,7 @@ export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
       >
         {/* Bezel shine highlight */}
         <div
-          className="pointer-events-none absolute inset-0 rounded-[52px] opacity-25"
+          className="pointer-events-none absolute inset-0 rounded-[50px] opacity-25"
           style={{
             background:
               "linear-gradient(125deg, rgba(255,255,255,0.22) 0%, transparent 30%)",
@@ -39,25 +40,25 @@ export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
         />
 
         {/* Side buttons - Action button (top left) */}
-        <div className="pointer-events-none absolute -left-[2px] top-[90px] z-10 h-[28px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
+        <div className="pointer-events-none absolute -left-[2px] top-[85px] z-10 h-[26px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
         {/* Volume up */}
-        <div className="pointer-events-none absolute -left-[2px] top-[135px] z-10 h-[50px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
+        <div className="pointer-events-none absolute -left-[2px] top-[125px] z-10 h-[46px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
         {/* Volume down */}
-        <div className="pointer-events-none absolute -left-[2px] top-[195px] z-10 h-[50px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
+        <div className="pointer-events-none absolute -left-[2px] top-[180px] z-10 h-[46px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
         {/* Power button */}
-        <div className="pointer-events-none absolute -right-[2px] top-[150px] z-10 h-[85px] w-[3px] rounded-r-[2px] bg-[#3a3a3c] shadow-sm" />
+        <div className="pointer-events-none absolute -right-[2px] top-[140px] z-10 h-[80px] w-[3px] rounded-r-[2px] bg-[#3a3a3c] shadow-sm" />
 
         {/* Inner screen area */}
-        <div className="relative overflow-hidden rounded-[43px] bg-black ring-[0.5px] ring-black/80">
+        <div className="relative overflow-hidden rounded-[42px] bg-black ring-[0.5px] ring-black/80">
           {/* Dynamic Island - positioned to overlap with app content */}
           <div
-            className="pointer-events-none absolute left-1/2 top-[10px] z-50 h-[36px] w-[124px] -translate-x-1/2 rounded-full bg-black"
+            className="pointer-events-none absolute left-1/2 top-[10px] z-50 h-[34px] w-[120px] -translate-x-1/2 rounded-full bg-black"
             aria-hidden
           >
             {/* Camera lens inside dynamic island */}
-            <div className="absolute right-[20px] top-1/2 h-[11px] w-[11px] -translate-y-1/2 rounded-full bg-[#1a1a1c] ring-1 ring-zinc-800/60">
+            <div className="absolute right-[18px] top-1/2 h-[10px] w-[10px] -translate-y-1/2 rounded-full bg-[#1a1a1c] ring-1 ring-zinc-800/60">
               <div className="absolute inset-[2px] rounded-full bg-[#0a1f3a]" />
-              <div className="absolute left-[3px] top-[2px] h-[2px] w-[2px] rounded-full bg-white/20" />
+              <div className="absolute left-[2px] top-[2px] h-[2px] w-[2px] rounded-full bg-white/20" />
             </div>
           </div>
 
@@ -82,7 +83,7 @@ export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
               className="flex shrink-0 justify-center pb-2 pt-1"
               style={{ backgroundColor: "#F5F6F8" }}
             >
-              <div className="h-[5px] w-[134px] rounded-full bg-black/25" aria-hidden />
+              <div className="h-[5px] w-[125px] rounded-full bg-black/25" aria-hidden />
             </div>
           </div>
         </div>
