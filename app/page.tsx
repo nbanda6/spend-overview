@@ -17,12 +17,12 @@ const GRID_ITEMS = [
 
 function StatusBar() {
   return (
-    <div className="relative flex items-center justify-between px-5 pb-2 pt-3 text-[14px] font-semibold text-white">
+    <div className="relative flex items-center justify-between px-6 pb-1 pt-0 text-[14px] font-semibold text-white">
       {/* Time - left side */}
       <span className="tabular-nums tracking-tight">9:41</span>
       
       {/* Space for Dynamic Island in center */}
-      <div className="w-[130px]" />
+      <div className="w-[126px]" />
       
       {/* Status icons - right side */}
       <div className="flex items-center gap-[5px]">
@@ -79,9 +79,9 @@ export default function HomePage() {
       style={{ backgroundColor: ICICI_LIGHT.pageBg }}
     >
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
-        {/* Hero — orange header (reference light theme) */}
+        {/* Hero — orange header overlapping dynamic island */}
         <div
-          className="px-4 pb-5 pt-[50px] text-white"
+          className="px-4 pb-5 pt-[14px] text-white"
           style={{
             background: `linear-gradient(165deg, ${ICICI_LIGHT.headerGradientFrom} 0%, ${ICICI_LIGHT.orange} 42%, ${ICICI_LIGHT.orangeDark} 100%)`,
           }}

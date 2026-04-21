@@ -1,16 +1,15 @@
 /**
- * iPhone 17 Pro dimensions based on 6.3" display
- * Physical: 71.45 × 149.6 mm, Screen: 2622 × 1206 px @3x = 874 × 402 pt
- * Using standard iOS logical resolution for prototyping
+ * iPhone 17 dimensions: 150mm (H) x 71.9mm (W)
+ * Scaled to logical pixels for prototyping (~5.58px per mm)
  */
-const IPHONE_17_PRO = {
-  widthPx: 402,
-  heightPx: 874,
+const IPHONE_17 = {
+  widthPx: 401,
+  heightPx: 837,
 } as const;
 
 export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="ios17-desk flex min-h-dvh flex-col items-center justify-center bg-[#c5c7cc] px-2 py-4 sm:px-4 sm:py-6">
+    <div className="ios17-desk flex min-h-dvh flex-col items-center justify-center bg-[#c5c7cc] px-2 py-3 sm:px-4 sm:py-4">
       {/* Subtle gradient background */}
       <div
         className="pointer-events-none fixed inset-0 -z-10"
@@ -23,7 +22,7 @@ export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
 
       {/* Phone outer bezel - titanium frame */}
       <div
-        className="relative w-full max-w-[430px] shrink-0 rounded-[54px] p-[9px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5),0_0_0_1px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.08)]"
+        className="relative w-full max-w-[423px] shrink-0 rounded-[52px] p-[9px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5),0_0_0_1px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.08)]"
         style={{
           background:
             "linear-gradient(160deg, #4a4a4c 0%, #3a3a3c 15%, #2c2c2e 45%, #1c1c1e 100%)",
@@ -31,7 +30,7 @@ export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
       >
         {/* Bezel shine highlight */}
         <div
-          className="pointer-events-none absolute inset-0 rounded-[54px] opacity-25"
+          className="pointer-events-none absolute inset-0 rounded-[52px] opacity-25"
           style={{
             background:
               "linear-gradient(125deg, rgba(255,255,255,0.22) 0%, transparent 30%)",
@@ -40,34 +39,34 @@ export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
         />
 
         {/* Side buttons - Action button (top left) */}
-        <div className="pointer-events-none absolute -left-[2px] top-[95px] z-10 h-[30px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
+        <div className="pointer-events-none absolute -left-[2px] top-[90px] z-10 h-[28px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
         {/* Volume up */}
-        <div className="pointer-events-none absolute -left-[2px] top-[145px] z-10 h-[55px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
+        <div className="pointer-events-none absolute -left-[2px] top-[135px] z-10 h-[50px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
         {/* Volume down */}
-        <div className="pointer-events-none absolute -left-[2px] top-[210px] z-10 h-[55px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
+        <div className="pointer-events-none absolute -left-[2px] top-[195px] z-10 h-[50px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
         {/* Power button */}
-        <div className="pointer-events-none absolute -right-[2px] top-[160px] z-10 h-[90px] w-[3px] rounded-r-[2px] bg-[#3a3a3c] shadow-sm" />
+        <div className="pointer-events-none absolute -right-[2px] top-[150px] z-10 h-[85px] w-[3px] rounded-r-[2px] bg-[#3a3a3c] shadow-sm" />
 
         {/* Inner screen area */}
-        <div className="relative overflow-hidden rounded-[45px] bg-black ring-[0.5px] ring-black/80">
-          {/* Dynamic Island */}
+        <div className="relative overflow-hidden rounded-[43px] bg-black ring-[0.5px] ring-black/80">
+          {/* Dynamic Island - positioned to overlap with app content */}
           <div
-            className="pointer-events-none absolute left-1/2 top-[11px] z-40 h-[37px] w-[126px] -translate-x-1/2 rounded-full bg-black"
+            className="pointer-events-none absolute left-1/2 top-[10px] z-50 h-[36px] w-[124px] -translate-x-1/2 rounded-full bg-black"
             aria-hidden
           >
             {/* Camera lens inside dynamic island */}
-            <div className="absolute right-[22px] top-1/2 h-[12px] w-[12px] -translate-y-1/2 rounded-full bg-[#1a1a1c] ring-1 ring-zinc-800/60">
+            <div className="absolute right-[20px] top-1/2 h-[11px] w-[11px] -translate-y-1/2 rounded-full bg-[#1a1a1c] ring-1 ring-zinc-800/60">
               <div className="absolute inset-[2px] rounded-full bg-[#0a1f3a]" />
               <div className="absolute left-[3px] top-[2px] h-[2px] w-[2px] rounded-full bg-white/20" />
             </div>
           </div>
 
-          {/* Screen content wrapper */}
+          {/* Screen content wrapper - content starts from top, overlapping with dynamic island */}
           <div
             className="relative mx-auto flex w-full flex-col overflow-hidden"
             style={{
-              maxWidth: `${IPHONE_17_PRO.widthPx}px`,
-              height: `min(${IPHONE_17_PRO.heightPx}px, calc(100dvh - 120px))`,
+              maxWidth: `${IPHONE_17.widthPx}px`,
+              height: `min(${IPHONE_17.heightPx}px, calc(100dvh - 100px))`,
               backgroundColor: "#F5F6F8",
             }}
           >
