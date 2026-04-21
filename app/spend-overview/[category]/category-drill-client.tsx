@@ -105,9 +105,9 @@ export function CategoryDrillClient({
               key={`${tx.merchant}-${tx.date}-${i}`}
               className="border-b border-zinc-100 last:border-0"
             >
-              <button
-                type="button"
-                className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-zinc-50"
+              <Link
+                href={`/spend-overview/${slug}/${i}?m=${monthKey}`}
+                className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors active:bg-zinc-50"
               >
                 <span
                   className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
@@ -143,7 +143,7 @@ export function CategoryDrillClient({
                     </svg>
                   </span>
                 </div>
-              </button>
+              </Link>
             </li>
           ))}
         </ul>
