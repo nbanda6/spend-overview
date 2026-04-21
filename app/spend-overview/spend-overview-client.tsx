@@ -257,7 +257,7 @@ export function SpendOverviewClient({
     >
       <div className="sticky top-0 z-20 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
         <header
-          className="flex items-center gap-3 px-3 py-3.5 text-white"
+          className="flex items-center gap-3 px-3 pb-3.5 pt-[52px] text-white"
           style={{
             background: `linear-gradient(135deg, ${ICICI.headerFrom} 0%, ${ICICI.headerTo} 100%)`,
           }}

@@ -152,7 +152,7 @@ export default function ServicesPage() {
       style={{ backgroundColor: "#F5F6F8" }}
     >
       <header
-        className="sticky top-0 z-10 flex items-center gap-3 px-3 py-3.5 text-white shadow-md"
+        className="sticky top-0 z-10 flex items-center gap-3 px-3 pb-3.5 pt-[52px] text-white shadow-md"
         style={{
           background: `linear-gradient(135deg, ${ICICI.headerFrom} 0%, ${ICICI.headerTo} 100%)`,
         }}
