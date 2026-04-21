@@ -18,9 +18,11 @@ const FILTERS = ["Last 7 Days", "This Month", "Custom Range"] as const;
 export function CategoryDrillClient({
   slug,
   monthKey,
+  fromSource,
 }: {
   slug: CategorySlug;
   monthKey: MonthKey;
+  fromSource: string;
 }) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("This Month");
   const cat = CATEGORY_META[slug];
@@ -43,13 +45,13 @@ export function CategoryDrillClient({
       style={{ backgroundColor: "#F5F6F8" }}
     >
       <header
-        className="sticky top-0 z-10 flex items-center gap-3 px-3 py-3.5 text-white shadow-md"
+        className="sticky top-0 z-10 flex items-center gap-3 px-3 pb-3.5 pt-[52px] text-white shadow-md"
         style={{
           background: `linear-gradient(135deg, ${ICICI.headerFrom} 0%, ${ICICI.headerTo} 100%)`,
         }}
       >
         <Link
-          href={`/spend-overview?m=${monthKey}`}
+          href={`/spend-overview?m=${monthKey}&from=${fromSource}`}
           className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10"
           aria-label="Back to Spend Overview"
         >
@@ -105,9 +107,9 @@ export function CategoryDrillClient({
               key={`${tx.merchant}-${tx.date}-${i}`}
               className="border-b border-zinc-100 last:border-0"
             >
-              <button
-                type="button"
-                className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-zinc-50"
+              <Link
+                href={`/spend-overview/${slug}/${i}?m=${monthKey}&from=${fromSource}`}
+                className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors active:bg-zinc-50"
               >
                 <span
                   className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
@@ -143,7 +145,7 @@ export function CategoryDrillClient({
                     </svg>
                   </span>
                 </div>
-              </button>
+              </Link>
             </li>
           ))}
         </ul>

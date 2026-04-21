@@ -1,85 +1,92 @@
 /**
- * iPhone 17 Pro–sized viewport (logical ~402 × 874 pt from 1206 × 2622 px @3×).
- * iOS-style phone chrome for prototypes (not affiliated with Apple).
+ * iPhone 17 dimensions: 150mm (H) x 71.9mm (W)
+ * Scaled to logical pixels for prototyping (~5.58px per mm)
  */
-const IPHONE_17_PRO = {
-  widthPx: 402,
-  /** Content area height (full screen rectangle); home indicator sits below in UI chrome */
-  heightPx: 874,
+const IPHONE_17 = {
+  widthPx: 401,
+  heightPx: 837,
 } as const;
 
 export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="ios17-desk flex min-h-dvh flex-col items-center justify-center bg-[#a8aaae] px-3 py-4 sm:px-6 sm:py-8">
+    <div className="ios17-desk flex min-h-dvh flex-col items-center justify-center bg-[#c5c7cc] px-2 py-3 sm:px-4 sm:py-4">
+      {/* Subtle gradient background */}
       <div
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 50% 20%, rgba(255,255,255,0.35) 0%, transparent 55%), linear-gradient(165deg, #b9bbc0 0%, #9b9ea4 45%, #8a8d94 100%)",
+            "radial-gradient(ellipse 90% 70% at 50% 30%, rgba(255,255,255,0.4) 0%, transparent 60%), linear-gradient(170deg, #d0d2d6 0%, #b8babd 40%, #a6a8ac 100%)",
         }}
         aria-hidden
       />
 
-      <div className="mb-2 text-center sm:mb-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-700/90">
-          Prototype
-        </p>
-        <p className="mt-1 text-sm font-medium text-zinc-800">iPhone 17 · iOS</p>
-      </div>
-
+      {/* Phone outer bezel - titanium frame */}
       <div
-        className="relative w-full max-w-[432px] shrink-0 rounded-[3rem] p-[11px] shadow-[0_32px_100px_-16px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.14)]"
+        className="relative w-full max-w-[423px] shrink-0 rounded-[52px] p-[9px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5),0_0_0_1px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.08)]"
         style={{
           background:
-            "linear-gradient(155deg, #48484a 0%, #3a3a3c 22%, #2c2c2e 55%, #1d1d1f 100%)",
+            "linear-gradient(160deg, #4a4a4c 0%, #3a3a3c 15%, #2c2c2e 45%, #1c1c1e 100%)",
         }}
       >
+        {/* Bezel shine highlight */}
         <div
-          className="pointer-events-none absolute inset-0 rounded-[3rem] opacity-40"
+          className="pointer-events-none absolute inset-0 rounded-[52px] opacity-25"
           style={{
             background:
-              "linear-gradient(125deg, rgba(255,255,255,0.16) 0%, transparent 42%, transparent 100%)",
+              "linear-gradient(125deg, rgba(255,255,255,0.22) 0%, transparent 30%)",
           }}
           aria-hidden
         />
 
-        <div className="pointer-events-none absolute -left-[2px] top-[92px] z-10 h-9 w-[3px] rounded-l-[2px] bg-[#3f3f41] shadow-sm" />
-        <div className="pointer-events-none absolute -left-[2px] top-[148px] z-10 h-14 w-[3px] rounded-l-[2px] bg-[#3f3f41] shadow-sm" />
-        <div className="pointer-events-none absolute -right-[2px] top-[124px] z-10 h-20 w-[3px] rounded-r-[2px] bg-[#3f3f41] shadow-sm" />
+        {/* Side buttons - Action button (top left) */}
+        <div className="pointer-events-none absolute -left-[2px] top-[90px] z-10 h-[28px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
+        {/* Volume up */}
+        <div className="pointer-events-none absolute -left-[2px] top-[135px] z-10 h-[50px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
+        {/* Volume down */}
+        <div className="pointer-events-none absolute -left-[2px] top-[195px] z-10 h-[50px] w-[3px] rounded-l-[2px] bg-[#3a3a3c] shadow-sm" />
+        {/* Power button */}
+        <div className="pointer-events-none absolute -right-[2px] top-[150px] z-10 h-[85px] w-[3px] rounded-r-[2px] bg-[#3a3a3c] shadow-sm" />
 
-        <div className="relative overflow-hidden rounded-[2.35rem] bg-black ring-1 ring-black/60">
+        {/* Inner screen area */}
+        <div className="relative overflow-hidden rounded-[43px] bg-black ring-[0.5px] ring-black/80">
+          {/* Dynamic Island - positioned to overlap with app content */}
           <div
-            className="pointer-events-none absolute left-1/2 top-[11px] z-30 h-[29px] w-[118px] -translate-x-1/2 rounded-full bg-black shadow-[0_4px_12px_rgba(0,0,0,0.45)] ring-1 ring-white/[0.12]"
+            className="pointer-events-none absolute left-1/2 top-[10px] z-50 h-[36px] w-[124px] -translate-x-1/2 rounded-full bg-black"
             aria-hidden
-          />
+          >
+            {/* Camera lens inside dynamic island */}
+            <div className="absolute right-[20px] top-1/2 h-[11px] w-[11px] -translate-y-1/2 rounded-full bg-[#1a1a1c] ring-1 ring-zinc-800/60">
+              <div className="absolute inset-[2px] rounded-full bg-[#0a1f3a]" />
+              <div className="absolute left-[3px] top-[2px] h-[2px] w-[2px] rounded-full bg-white/20" />
+            </div>
+          </div>
 
-          {/* Fixed iPhone 17 Pro logical size; shrinks only if viewport is shorter */}
+          {/* Screen content wrapper - content starts from top, overlapping with dynamic island */}
           <div
-            className="mx-auto flex w-full max-w-[402px] flex-col overflow-hidden"
+            className="relative mx-auto flex w-full flex-col overflow-hidden"
             style={{
-              height: `min(${IPHONE_17_PRO.heightPx}px, calc(100dvh - 120px))`,
+              maxWidth: `${IPHONE_17.widthPx}px`,
+              height: `min(${IPHONE_17.heightPx}px, calc(100dvh - 100px))`,
               backgroundColor: "#F5F6F8",
             }}
           >
+            {/* Main content area - content starts from top, dynamic island overlays */}
             <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
               <div className="ios-app-scroll flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
                 {children}
               </div>
             </div>
 
+            {/* Home indicator */}
             <div
-              className="flex shrink-0 justify-center pb-2 pt-1.5"
+              className="flex shrink-0 justify-center pb-2 pt-1"
               style={{ backgroundColor: "#F5F6F8" }}
             >
-              <div className="h-[5px] w-[128px] rounded-full bg-black/[0.22]" aria-hidden />
+              <div className="h-[5px] w-[134px] rounded-full bg-black/25" aria-hidden />
             </div>
           </div>
         </div>
       </div>
-
-      <p className="mt-4 max-w-sm px-4 text-center text-[11px] leading-relaxed text-zinc-700/85 sm:mt-5">
-        Interactive preview · Not affiliated with Apple Inc. or ICICI Bank.
-      </p>
     </div>
   );
 }

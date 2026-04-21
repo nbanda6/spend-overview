@@ -231,8 +231,12 @@ function CategoryMomHint({ mom }: { mom: MomChange }) {
 
 export function SpendOverviewClient({
   initialMonthKey,
+  backHref,
+  fromSource,
 }: {
   initialMonthKey: MonthKey;
+  backHref: string;
+  fromSource: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -257,15 +261,15 @@ export function SpendOverviewClient({
     >
       <div className="sticky top-0 z-20 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
         <header
-          className="flex items-center gap-3 px-3 py-3.5 text-white"
+          className="flex items-center gap-3 px-3 pb-3.5 pt-[52px] text-white"
           style={{
             background: `linear-gradient(135deg, ${ICICI.headerFrom} 0%, ${ICICI.headerTo} 100%)`,
           }}
         >
           <Link
-            href="/services"
+            href={backHref}
             className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10"
-            aria-label="Back to Services"
+            aria-label="Back"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
               <path
@@ -297,8 +301,8 @@ export function SpendOverviewClient({
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
             Month
           </p>
-          <div className="mt-2 flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {MONTHS.map((m) => (
+          <div className="mt-2 flex flex-row-reverse gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {[...MONTHS].reverse().map((m) => (
               <button
                 key={m.key}
                 type="button"
@@ -430,7 +434,7 @@ export function SpendOverviewClient({
               return (
                 <li key={slug} className="border-b border-zinc-100 last:border-0">
                   <Link
-                    href={`/spend-overview/${slug}?m=${monthKey}`}
+                    href={`/spend-overview/${slug}?m=${monthKey}&from=${fromSource}`}
                     className="flex items-center gap-3 px-4 py-3.5 active:bg-zinc-50"
                     aria-label={`${c.label}, ${formatInr(amount)}`}
                   >

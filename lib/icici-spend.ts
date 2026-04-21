@@ -80,28 +80,237 @@ export type TxRow = {
 };
 
 export const MONTH_KEYS = [
+  "may2025",
+  "jun2025",
+  "jul2025",
+  "aug2025",
+  "sep2025",
+  "oct2025",
+  "nov2025",
+  "dec2025",
   "jan2026",
   "feb2026",
   "mar2026",
   "apr2026",
-  "may2026",
 ] as const;
 export type MonthKey = (typeof MONTH_KEYS)[number];
 
 export const DEFAULT_MONTH: MonthKey = "apr2026";
 
 export const MONTHS: { key: MonthKey; label: string; short: string }[] = [
+  { key: "may2025", label: "May 2025", short: "May '25" },
+  { key: "jun2025", label: "June 2025", short: "Jun '25" },
+  { key: "jul2025", label: "July 2025", short: "Jul '25" },
+  { key: "aug2025", label: "August 2025", short: "Aug '25" },
+  { key: "sep2025", label: "September 2025", short: "Sep '25" },
+  { key: "oct2025", label: "October 2025", short: "Oct '25" },
+  { key: "nov2025", label: "November 2025", short: "Nov '25" },
+  { key: "dec2025", label: "December 2025", short: "Dec '25" },
   { key: "jan2026", label: "January 2026", short: "Jan" },
   { key: "feb2026", label: "February 2026", short: "Feb" },
   { key: "mar2026", label: "March 2026", short: "Mar" },
   { key: "apr2026", label: "April 2026", short: "Apr" },
-  { key: "may2026", label: "May 2026", short: "May" },
 ];
 
 export const TRANSACTIONS_BY_MONTH: Record<
   MonthKey,
   Record<CategorySlug, TxRow[]>
 > = {
+  may2025: {
+    shopping: [
+      { merchant: "Amazon", date: "28 May 2025", amount: 3200, initials: "A", channel: "Card" },
+      { merchant: "Flipkart", date: "15 May 2025", amount: 2100, initials: "F", channel: "UPI" },
+    ],
+    "food-dining": [
+      { merchant: "BigBasket", date: "29 May 2025", amount: 1450, initials: "B", channel: "UPI" },
+      { merchant: "Swiggy", date: "20 May 2025", amount: 890, initials: "S", channel: "UPI" },
+      { merchant: "Zomato", date: "12 May 2025", amount: 650, initials: "Z", channel: "UPI" },
+    ],
+    utilities: [
+      { merchant: "Electricity (BESCOM)", date: "22 May 2025", amount: 2600, initials: "E", channel: "Net Banking" },
+      { merchant: "Airtel Mobile", date: "05 May 2025", amount: 699, initials: "A", channel: "UPI" },
+    ],
+    travel: [
+      { merchant: "Uber", date: "30 May 2025", amount: 380, initials: "U", channel: "UPI" },
+      { merchant: "Petrol (IOCL)", date: "18 May 2025", amount: 2400, initials: "P", channel: "Card" },
+    ],
+    miscellaneous: [
+      { merchant: "ATM withdrawal fee", date: "25 May 2025", amount: 21, initials: "A", channel: "Card" },
+    ],
+  },
+  jun2025: {
+    shopping: [
+      { merchant: "Myntra", date: "25 Jun 2025", amount: 4500, initials: "M", channel: "UPI" },
+      { merchant: "Amazon", date: "18 Jun 2025", amount: 2890, initials: "A", channel: "Card" },
+      { merchant: "Flipkart", date: "08 Jun 2025", amount: 1750, initials: "F", channel: "Card" },
+    ],
+    "food-dining": [
+      { merchant: "JioMart", date: "28 Jun 2025", amount: 1200, initials: "J", channel: "UPI" },
+      { merchant: "Swiggy", date: "22 Jun 2025", amount: 1100, initials: "S", channel: "UPI" },
+      { merchant: "Zomato", date: "15 Jun 2025", amount: 780, initials: "Z", channel: "UPI" },
+      { merchant: "DMart", date: "05 Jun 2025", amount: 2200, initials: "D", channel: "Card" },
+    ],
+    utilities: [
+      { merchant: "Electricity (BESCOM)", date: "20 Jun 2025", amount: 2900, initials: "E", channel: "Net Banking" },
+      { merchant: "Gas (Indane)", date: "12 Jun 2025", amount: 1050, initials: "G", channel: "UPI" },
+    ],
+    travel: [
+      { merchant: "Uber", date: "29 Jun 2025", amount: 520, initials: "U", channel: "UPI" },
+      { merchant: "Petrol (HP)", date: "16 Jun 2025", amount: 2800, initials: "P", channel: "Card" },
+    ],
+    miscellaneous: [
+      { merchant: "Service charge", date: "10 Jun 2025", amount: 150, initials: "S", channel: "Card" },
+    ],
+  },
+  jul2025: {
+    shopping: [
+      { merchant: "Amazon", date: "30 Jul 2025", amount: 5600, initials: "A", channel: "Card" },
+      { merchant: "Croma", date: "22 Jul 2025", amount: 8500, initials: "C", channel: "Card" },
+      { merchant: "Flipkart", date: "10 Jul 2025", amount: 3200, initials: "F", channel: "UPI" },
+    ],
+    "food-dining": [
+      { merchant: "BigBasket", date: "28 Jul 2025", amount: 1800, initials: "B", channel: "UPI" },
+      { merchant: "Swiggy", date: "20 Jul 2025", amount: 1450, initials: "S", channel: "UPI" },
+      { merchant: "Blinkit", date: "15 Jul 2025", amount: 680, initials: "B", channel: "UPI" },
+      { merchant: "Zomato", date: "08 Jul 2025", amount: 920, initials: "Z", channel: "UPI" },
+    ],
+    utilities: [
+      { merchant: "Electricity (BESCOM)", date: "18 Jul 2025", amount: 3200, initials: "E", channel: "Net Banking" },
+      { merchant: "Broadband (ACT)", date: "05 Jul 2025", amount: 1499, initials: "A", channel: "Net Banking" },
+    ],
+    travel: [
+      { merchant: "Uber", date: "29 Jul 2025", amount: 620, initials: "U", channel: "UPI" },
+      { merchant: "IndiGo", date: "15 Jul 2025", amount: 5200, initials: "I", channel: "Card" },
+      { merchant: "Petrol (Shell)", date: "05 Jul 2025", amount: 3100, initials: "P", channel: "Card" },
+    ],
+    miscellaneous: [
+      { merchant: "Unknown merchant", date: "12 Jul 2025", amount: 299, initials: "U", channel: "Card" },
+    ],
+  },
+  aug2025: {
+    shopping: [
+      { merchant: "Amazon", date: "28 Aug 2025", amount: 4200, initials: "A", channel: "Card" },
+      { merchant: "Myntra", date: "18 Aug 2025", amount: 2890, initials: "M", channel: "UPI" },
+      { merchant: "Flipkart", date: "08 Aug 2025", amount: 1950, initials: "F", channel: "Card" },
+    ],
+    "food-dining": [
+      { merchant: "JioMart", date: "29 Aug 2025", amount: 1350, initials: "J", channel: "UPI" },
+      { merchant: "Swiggy", date: "22 Aug 2025", amount: 1680, initials: "S", channel: "UPI" },
+      { merchant: "Zomato", date: "14 Aug 2025", amount: 1100, initials: "Z", channel: "UPI" },
+      { merchant: "BigBasket", date: "05 Aug 2025", amount: 2100, initials: "B", channel: "UPI" },
+    ],
+    utilities: [
+      { merchant: "Electricity (BESCOM)", date: "20 Aug 2025", amount: 3400, initials: "E", channel: "Net Banking" },
+      { merchant: "Jio Mobile", date: "10 Aug 2025", amount: 749, initials: "J", channel: "UPI" },
+    ],
+    travel: [
+      { merchant: "Uber", date: "30 Aug 2025", amount: 480, initials: "U", channel: "UPI" },
+      { merchant: "Petrol (BP)", date: "20 Aug 2025", amount: 2900, initials: "P", channel: "Card" },
+      { merchant: "Rapido", date: "12 Aug 2025", amount: 220, initials: "R", channel: "UPI" },
+    ],
+    miscellaneous: [
+      { merchant: "SMS charges", date: "01 Aug 2025", amount: 15, initials: "S", channel: "Card" },
+    ],
+  },
+  sep2025: {
+    shopping: [
+      { merchant: "Amazon", date: "28 Sep 2025", amount: 7800, initials: "A", channel: "Card" },
+      { merchant: "Reliance Digital", date: "20 Sep 2025", amount: 12500, initials: "R", channel: "Card" },
+      { merchant: "Flipkart", date: "10 Sep 2025", amount: 4200, initials: "F", channel: "UPI" },
+    ],
+    "food-dining": [
+      { merchant: "BigBasket", date: "29 Sep 2025", amount: 2200, initials: "B", channel: "UPI" },
+      { merchant: "Swiggy", date: "22 Sep 2025", amount: 1890, initials: "S", channel: "UPI" },
+      { merchant: "Zomato", date: "15 Sep 2025", amount: 1350, initials: "Z", channel: "UPI" },
+      { merchant: "DMart", date: "08 Sep 2025", amount: 2800, initials: "D", channel: "Card" },
+    ],
+    utilities: [
+      { merchant: "Electricity (BESCOM)", date: "18 Sep 2025", amount: 3100, initials: "E", channel: "Net Banking" },
+      { merchant: "Gas (Indane)", date: "12 Sep 2025", amount: 1100, initials: "G", channel: "UPI" },
+      { merchant: "Broadband", date: "05 Sep 2025", amount: 1499, initials: "B", channel: "Net Banking" },
+    ],
+    travel: [
+      { merchant: "Uber", date: "30 Sep 2025", amount: 720, initials: "U", channel: "UPI" },
+      { merchant: "Petrol (IOCL)", date: "18 Sep 2025", amount: 3200, initials: "P", channel: "Card" },
+    ],
+    miscellaneous: [
+      { merchant: "International fee", date: "25 Sep 2025", amount: 180, initials: "I", channel: "Card" },
+    ],
+  },
+  oct2025: {
+    shopping: [
+      { merchant: "Amazon", date: "30 Oct 2025", amount: 9500, initials: "A", channel: "Card" },
+      { merchant: "Flipkart", date: "22 Oct 2025", amount: 6800, initials: "F", channel: "Card" },
+      { merchant: "Myntra", date: "12 Oct 2025", amount: 3500, initials: "M", channel: "UPI" },
+    ],
+    "food-dining": [
+      { merchant: "JioMart", date: "28 Oct 2025", amount: 1650, initials: "J", channel: "UPI" },
+      { merchant: "Swiggy", date: "20 Oct 2025", amount: 2100, initials: "S", channel: "UPI" },
+      { merchant: "BigBasket", date: "15 Oct 2025", amount: 2400, initials: "B", channel: "UPI" },
+      { merchant: "Zomato", date: "08 Oct 2025", amount: 1450, initials: "Z", channel: "UPI" },
+    ],
+    utilities: [
+      { merchant: "Electricity (BESCOM)", date: "22 Oct 2025", amount: 2800, initials: "E", channel: "Net Banking" },
+      { merchant: "Airtel Mobile", date: "10 Oct 2025", amount: 799, initials: "A", channel: "UPI" },
+    ],
+    travel: [
+      { merchant: "Uber", date: "29 Oct 2025", amount: 580, initials: "U", channel: "UPI" },
+      { merchant: "Petrol (HP)", date: "18 Oct 2025", amount: 3400, initials: "P", channel: "Card" },
+      { merchant: "IndiGo", date: "10 Oct 2025", amount: 4800, initials: "I", channel: "Card" },
+    ],
+    miscellaneous: [
+      { merchant: "POS transaction", date: "25 Oct 2025", amount: 350, initials: "P", channel: "Card" },
+    ],
+  },
+  nov2025: {
+    shopping: [
+      { merchant: "Amazon", date: "28 Nov 2025", amount: 12000, initials: "A", channel: "Card" },
+      { merchant: "Croma", date: "20 Nov 2025", amount: 15000, initials: "C", channel: "Card" },
+      { merchant: "Flipkart", date: "10 Nov 2025", amount: 8500, initials: "F", channel: "Card" },
+    ],
+    "food-dining": [
+      { merchant: "BigBasket", date: "29 Nov 2025", amount: 2800, initials: "B", channel: "UPI" },
+      { merchant: "Swiggy", date: "22 Nov 2025", amount: 2200, initials: "S", channel: "UPI" },
+      { merchant: "Zomato", date: "15 Nov 2025", amount: 1800, initials: "Z", channel: "UPI" },
+      { merchant: "DMart", date: "08 Nov 2025", amount: 3500, initials: "D", channel: "Card" },
+    ],
+    utilities: [
+      { merchant: "Electricity (BESCOM)", date: "20 Nov 2025", amount: 2600, initials: "E", channel: "Net Banking" },
+      { merchant: "Gas (Indane)", date: "12 Nov 2025", amount: 1100, initials: "G", channel: "UPI" },
+    ],
+    travel: [
+      { merchant: "Uber", date: "30 Nov 2025", amount: 650, initials: "U", channel: "UPI" },
+      { merchant: "Petrol (Shell)", date: "18 Nov 2025", amount: 3600, initials: "P", channel: "Card" },
+    ],
+    miscellaneous: [
+      { merchant: "Wallet adjustment", date: "10 Nov 2025", amount: 200, initials: "W", channel: "UPI" },
+    ],
+  },
+  dec2025: {
+    shopping: [
+      { merchant: "Amazon", date: "28 Dec 2025", amount: 8500, initials: "A", channel: "Card" },
+      { merchant: "Flipkart", date: "22 Dec 2025", amount: 5200, initials: "F", channel: "Card" },
+      { merchant: "Myntra", date: "15 Dec 2025", amount: 3800, initials: "M", channel: "UPI" },
+    ],
+    "food-dining": [
+      { merchant: "JioMart", date: "29 Dec 2025", amount: 1900, initials: "J", channel: "UPI" },
+      { merchant: "Swiggy", date: "24 Dec 2025", amount: 2500, initials: "S", channel: "UPI" },
+      { merchant: "BigBasket", date: "18 Dec 2025", amount: 2200, initials: "B", channel: "UPI" },
+      { merchant: "Zomato", date: "10 Dec 2025", amount: 1650, initials: "Z", channel: "UPI" },
+    ],
+    utilities: [
+      { merchant: "Electricity (BESCOM)", date: "18 Dec 2025", amount: 2400, initials: "E", channel: "Net Banking" },
+      { merchant: "Broadband (ACT)", date: "05 Dec 2025", amount: 1499, initials: "A", channel: "Net Banking" },
+    ],
+    travel: [
+      { merchant: "Uber", date: "30 Dec 2025", amount: 780, initials: "U", channel: "UPI" },
+      { merchant: "Ola", date: "25 Dec 2025", amount: 420, initials: "O", channel: "UPI" },
+      { merchant: "Petrol (BP)", date: "15 Dec 2025", amount: 3800, initials: "P", channel: "Card" },
+    ],
+    miscellaneous: [
+      { merchant: "Service fee", date: "20 Dec 2025", amount: 118, initials: "S", channel: "Card" },
+    ],
+  },
   jan2026: {
     shopping: [
       { merchant: "Amazon", date: "28 Jan 2026", amount: 2100, initials: "A", channel: "Card" },
@@ -376,72 +585,6 @@ export const TRANSACTIONS_BY_MONTH: Record<
         amount: 200,
         initials: "W",
         channel: "UPI",
-      },
-    ],
-  },
-  may2026: {
-    shopping: [
-      { merchant: "Amazon", date: "28 May 2026", amount: 8900, initials: "A", channel: "Card" },
-      { merchant: "Flipkart", date: "20 May 2026", amount: 3200, initials: "F", channel: "UPI" },
-      { merchant: "IKEA", date: "12 May 2026", amount: 7600, initials: "I", channel: "Card" },
-      { merchant: "Croma", date: "05 May 2026", amount: 12999, initials: "C", channel: "Card" },
-    ],
-    "food-dining": [
-      {
-        merchant: "BigBasket",
-        date: "29 May 2026",
-        amount: 2400,
-        initials: "B",
-        channel: "UPI",
-      },
-      {
-        merchant: "Nature's Basket",
-        date: "25 May 2026",
-        amount: 1800,
-        initials: "N",
-        channel: "Card",
-      },
-      {
-        merchant: "JioMart",
-        date: "23 May 2026",
-        amount: 990,
-        initials: "J",
-        channel: "UPI",
-      },
-      { merchant: "Zomato", date: "18 May 2026", amount: 2100, initials: "Z", channel: "UPI" },
-      { merchant: "Swiggy", date: "10 May 2026", amount: 4500, initials: "S", channel: "UPI" },
-    ],
-    utilities: [
-      {
-        merchant: "Electricity (BESCOM)",
-        date: "22 May 2026",
-        amount: 3600,
-        initials: "E",
-        channel: "Net Banking",
-      },
-      { merchant: "DTH (Tata Play)", date: "08 May 2026", amount: 450, initials: "D", channel: "UPI" },
-      { merchant: "Insurance (auto-debit)", date: "02 May 2026", amount: 8200, initials: "I", channel: "Net Banking" },
-    ],
-    travel: [
-      { merchant: "Uber", date: "30 May 2026", amount: 680, initials: "U", channel: "UPI" },
-      { merchant: "Ola", date: "24 May 2026", amount: 520, initials: "O", channel: "UPI" },
-      { merchant: "Petrol (BP)", date: "14 May 2026", amount: 4100, initials: "P", channel: "Card" },
-      { merchant: "Vistara", date: "06 May 2026", amount: 8900, initials: "V", channel: "Card" },
-    ],
-    miscellaneous: [
-      {
-        merchant: "Unmatched UPI beneficiary",
-        date: "27 May 2026",
-        amount: 750,
-        initials: "U",
-        channel: "UPI",
-      },
-      {
-        merchant: "Service fee",
-        date: "04 May 2026",
-        amount: 118,
-        initials: "S",
-        channel: "Card",
       },
     ],
   },

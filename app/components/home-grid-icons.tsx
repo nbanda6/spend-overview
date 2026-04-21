@@ -133,6 +133,19 @@ export function GridIcon({ kind }: { kind: string }) {
           <path d="M4 20h16" stroke={stroke} strokeWidth="1.75" strokeLinecap="round" />
         </svg>
       );
+    case "spends":
+      return (
+        <svg className={c} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <circle cx="12" cy="12" r="9" stroke={stroke} strokeWidth="1.75" opacity="0.25" />
+          <path
+            d="M12 3a9 9 0 016.36 15.36"
+            stroke={stroke}
+            strokeWidth="1.75"
+            strokeLinecap="round"
+          />
+          <circle cx="12" cy="12" r="4" stroke={stroke} strokeWidth="1.75" />
+        </svg>
+      );
     default:
       return (
         <svg className={c} viewBox="0 0 24 24" fill="none" aria-hidden>
