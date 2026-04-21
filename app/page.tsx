@@ -19,26 +19,34 @@ const GRID_ITEMS = [
 
 function StatusBar() {
   return (
-    <div className="flex items-center justify-between px-1 pb-2 pt-1 text-[13px] font-semibold text-white">
-      <span className="tabular-nums">9:41</span>
-      <div className="flex items-center gap-1.5 pr-1">
+    <div className="relative flex items-center justify-between px-5 pb-2 pt-3 text-[14px] font-semibold text-white">
+      {/* Time - left side */}
+      <span className="tabular-nums tracking-tight">9:41</span>
+      
+      {/* Space for Dynamic Island in center */}
+      <div className="w-[130px]" />
+      
+      {/* Status icons - right side */}
+      <div className="flex items-center gap-[5px]">
+        {/* Signal bars */}
         <svg width="18" height="12" viewBox="0 0 18 12" fill="none" aria-hidden className="text-white">
-          <path
-            d="M1 9.5h2.5v2H1v-2zm4-2h2.5v4H5v-4zm4-3h2.5v7H9v-7zm4-2h2.5v9h-2.5V2.5z"
-            fill="currentColor"
-            opacity="0.95"
-          />
+          <rect x="0" y="8" width="3" height="4" rx="0.5" fill="currentColor" />
+          <rect x="4" y="5.5" width="3" height="6.5" rx="0.5" fill="currentColor" />
+          <rect x="8" y="3" width="3" height="9" rx="0.5" fill="currentColor" />
+          <rect x="12" y="0" width="3" height="12" rx="0.5" fill="currentColor" />
         </svg>
+        {/* WiFi */}
         <svg width="16" height="12" viewBox="0 0 16 12" fill="none" aria-hidden className="text-white">
-          <path
-            d="M8 2.5c2.5 1.8 4 4 4 6a4 4 0 11-8 0c0-2 1.5-4.2 4-6z"
-            stroke="currentColor"
-            strokeWidth="1.2"
-            fill="none"
-          />
+          <path d="M8 2.4c3.1 0 5.8 1.4 7.5 3.5l-1.3 1.4C12.8 5.5 10.5 4.4 8 4.4S3.2 5.5 1.8 7.3L.5 5.9C2.2 3.8 4.9 2.4 8 2.4z" fill="currentColor" />
+          <path d="M8 6c1.9 0 3.6.9 4.7 2.2l-1.3 1.4C10.5 8.6 9.3 8 8 8s-2.5.6-3.4 1.6L3.3 8.2C4.4 6.9 6.1 6 8 6z" fill="currentColor" />
+          <circle cx="8" cy="11" r="1.5" fill="currentColor" />
         </svg>
-        <div className="flex h-[11px] w-6 items-center rounded-sm border border-white/80 px-[2px]">
-          <div className="h-[7px] flex-1 rounded-[1px] bg-white" />
+        {/* Battery */}
+        <div className="flex items-center">
+          <div className="flex h-[12px] w-[24px] items-center rounded-[3px] border-[1.5px] border-white px-[2px]">
+            <div className="h-[7px] w-full rounded-[1.5px] bg-white" />
+          </div>
+          <div className="ml-[1px] h-[5px] w-[1.5px] rounded-r-sm bg-white" />
         </div>
       </div>
     </div>
@@ -75,7 +83,7 @@ export default function HomePage() {
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
         {/* Hero — orange header (reference light theme) */}
         <div
-          className="px-4 pb-5 pt-1 text-white"
+          className="px-4 pb-5 pt-[50px] text-white"
           style={{
             background: `linear-gradient(165deg, ${ICICI_LIGHT.headerGradientFrom} 0%, ${ICICI_LIGHT.orange} 42%, ${ICICI_LIGHT.orangeDark} 100%)`,
           }}
