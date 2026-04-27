@@ -11,11 +11,8 @@ import {
   type CategoryIconKind,
   type MomChange,
   type MonthKey,
-  type ViewPeriod,
   formatMomPct,
   getSpendInsight,
-  getWeeklySpendInsight,
-  getWeeksForMonth,
   formatInr,
   spendCardClass,
   spendCardShadow,
@@ -189,17 +186,8 @@ export function SpendOverviewClient({
   const router = useRouter();
   const pathname = usePathname();
   const [monthKey, setMonthKey] = useState<MonthKey>(initialMonthKey);
-  const [viewPeriod, setViewPeriod] = useState<ViewPeriod>("monthly");
-  const [weekNum, setWeekNum] = useState<number>(4);
 
-  const weeks = useMemo(() => getWeeksForMonth(monthKey), [monthKey]);
-
-  const insight = useMemo(() => {
-    if (viewPeriod === "weekly") {
-      return getWeeklySpendInsight(monthKey, weekNum);
-    }
-    return getSpendInsight(monthKey);
-  }, [monthKey, viewPeriod, weekNum]);
+  const insight = useMemo(() => getSpendInsight(monthKey), [monthKey]);
   const { snapshot, previousMonthLabel, totalMom, categoryMom } = insight;
 
   return (
@@ -246,39 +234,6 @@ export function SpendOverviewClient({
         </header>
 
         <div className="border-b border-zinc-200/90 bg-zinc-100 px-3 pb-3 pt-2.5">
-          {/* Weekly/Monthly Toggle */}
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-              View Period
-            </p>
-            <div className="flex rounded-lg bg-white p-0.5 shadow-sm ring-1 ring-zinc-200/80">
-              <button
-                type="button"
-                onClick={() => setViewPeriod("weekly")}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
-                  viewPeriod === "weekly"
-                    ? "text-white shadow-sm"
-                    : "text-zinc-600 hover:text-zinc-900"
-                }`}
-                style={viewPeriod === "weekly" ? { backgroundColor: HDFC.navyBlue } : undefined}
-              >
-                Weekly
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewPeriod("monthly")}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
-                  viewPeriod === "monthly"
-                    ? "text-white shadow-sm"
-                    : "text-zinc-600 hover:text-zinc-900"
-                }`}
-                style={viewPeriod === "monthly" ? { backgroundColor: HDFC.navyBlue } : undefined}
-              >
-                Monthly
-              </button>
-            </div>
-          </div>
-
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
             Month
           </p>
@@ -304,34 +259,6 @@ export function SpendOverviewClient({
               </button>
             ))}
           </div>
-
-          {/* Week Selector (only shown when weekly view is active) */}
-          {viewPeriod === "weekly" && (
-            <>
-              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                Week
-              </p>
-              <div className="mt-2 flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {weeks.map((w, idx) => (
-                  <button
-                    key={w.key}
-                    type="button"
-                    onClick={() => setWeekNum(idx + 1)}
-                    className={`shrink-0 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${
-                      weekNum === idx + 1
-                        ? "text-white shadow-sm"
-                        : "border border-zinc-200/90 bg-white text-zinc-600 hover:bg-zinc-50"
-                    }`}
-                    style={
-                      weekNum === idx + 1 ? { backgroundColor: HDFC.navyBlue } : undefined
-                    }
-                  >
-                    {w.short}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
 
           <p className="mt-2 text-xs text-zinc-600">
             Showing data for{" "}
@@ -368,11 +295,11 @@ export function SpendOverviewClient({
                   vs <span className="text-zinc-900">{previousMonthLabel}</span>
                 </>
               ) : (
-                viewPeriod === "weekly" ? "Week-over-week" : "Month-over-month"
+                "Month-over-month"
               )}
             </p>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <MomPill mom={totalMom} periodLabel={viewPeriod === "weekly" ? "week" : "month"} />
+              <MomPill mom={totalMom} />
             </div>
           </div>
         </section>
@@ -414,7 +341,7 @@ export function SpendOverviewClient({
                         {formatInr(amount)}
                       </span>
                       {previousMonthLabel ? (
-                        <CategoryMomHint mom={categoryMom[slug]} periodLabel={viewPeriod === "weekly" ? "week" : "month"} />
+                        <CategoryMomHint mom={categoryMom[slug]} />
                       ) : null}
                     </div>
                     <span className="text-zinc-300" aria-hidden>
