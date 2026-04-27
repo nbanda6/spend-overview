@@ -3,7 +3,7 @@
 import Link from "next/link";
 import {
   CATEGORY_META,
-  ICICI,
+  HDFC,
   MONTHS,
   type CategorySlug,
   type MonthKey,
@@ -28,7 +28,7 @@ export function TransactionDetailClient({
   const monthLabel = MONTHS.find((x) => x.key === monthKey)?.label ?? monthKey;
 
   // Generate a mock reference number based on transaction details
-  const refNumber = `ICICI${monthKey.toUpperCase()}${txIndex.toString().padStart(4, "0")}${transaction.amount}`;
+  const refNumber = `HDFC${monthKey.toUpperCase()}${txIndex.toString().padStart(4, "0")}${transaction.amount}`;
   
   // Generate mock time from date
   const txTime = "14:32:18";
@@ -42,7 +42,7 @@ export function TransactionDetailClient({
       <header
         className="sticky top-0 z-10 flex items-center gap-3 px-3 pb-3.5 pt-[52px] text-white shadow-md"
         style={{
-          background: `linear-gradient(135deg, ${ICICI.headerFrom} 0%, ${ICICI.headerTo} 100%)`,
+          background: `linear-gradient(180deg, ${HDFC.headerFrom} 0%, ${HDFC.headerTo} 100%)`,
         }}
       >
         <Link
@@ -150,7 +150,7 @@ export function TransactionDetailClient({
           <button
             type="button"
             className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98]"
-            style={{ backgroundColor: ICICI.orange }}
+            style={{ backgroundColor: HDFC.navyBlue }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
               <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />

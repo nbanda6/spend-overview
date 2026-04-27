@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import {
   CATEGORY_META,
   CATEGORY_ORDER,
-  ICICI,
+  HDFC,
   MONTHS,
   type CategoryIconKind,
   type MomChange,
@@ -134,7 +134,7 @@ function Donut({
           </p>
           <p
             className="mt-1 text-center text-lg font-bold tabular-nums leading-tight"
-            style={{ color: ICICI.oceanBlue }}
+            style={{ color: HDFC.navyBlue }}
           >
             {centerLabel}
           </p>
@@ -263,7 +263,7 @@ export function SpendOverviewClient({
         <header
           className="flex items-center gap-3 px-3 pb-3.5 pt-[52px] text-white"
           style={{
-            background: `linear-gradient(135deg, ${ICICI.headerFrom} 0%, ${ICICI.headerTo} 100%)`,
+            background: `linear-gradient(180deg, ${HDFC.headerFrom} 0%, ${HDFC.headerTo} 100%)`,
           }}
         >
           <Link
@@ -283,7 +283,7 @@ export function SpendOverviewClient({
           </Link>
           <div className="flex min-w-0 flex-1 flex-col">
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/80">
-              ICICI Bank
+              HDFC Bank
             </span>
             <h1 className="truncate text-base font-semibold leading-tight">
               Your Spending at a Glance
@@ -316,7 +316,7 @@ export function SpendOverviewClient({
                     : "border border-zinc-200/90 bg-white text-zinc-600 hover:bg-zinc-50"
                 }`}
                 style={
-                  m.key === monthKey ? { backgroundColor: ICICI.orange } : undefined
+                  m.key === monthKey ? { backgroundColor: HDFC.navyBlue } : undefined
                 }
               >
                 {m.short}
