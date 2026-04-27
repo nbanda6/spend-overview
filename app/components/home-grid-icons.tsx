@@ -54,11 +54,15 @@ export function GridIcon({ kind }: { kind: string }) {
         </svg>
       );
     case "upipay":
-      // UPI Payment - UPI logo style with arrows
+      // UPI Payment - UPI logo with green and orange arrows (matching HDFC reference)
       return (
         <svg className={c} viewBox="0 0 24 24" fill="none" aria-hidden>
-          <path d="M6 12h12M14 8l4 4-4 4" stroke="#138808" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M18 12H6M10 8L6 12l4 4" stroke="#FF6B35" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          {/* Green arrow pointing right-up */}
+          <path d="M8 16L16 8" stroke="#138808" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M10 8h6v6" stroke="#138808" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          {/* Orange arrow pointing left-down */}
+          <path d="M16 8L8 16" stroke="#FF9933" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M14 16H8v-6" stroke="#FF9933" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
     case "services":
@@ -72,12 +76,17 @@ export function GridIcon({ kind }: { kind: string }) {
         </svg>
       );
     case "spends":
-      // Spends Overview - Pie chart style
+      // Spends Overview - Donut chart style
       return (
         <svg className={c} viewBox="0 0 24 24" fill="none" aria-hidden>
-          <circle cx="12" cy="12" r="9" stroke={HDFC_BLUE} strokeWidth="1.5" />
-          <path d="M12 3v9l6.36 6.36" stroke={HDFC_BLUE} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M12 12l-6.36 6.36" stroke={HDFC_BLUE} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="12" cy="12" r="9" stroke={HDFC_BLUE} strokeWidth="1.5" opacity="0.25" />
+          <path
+            d="M12 3a9 9 0 016.36 15.36"
+            stroke={HDFC_BLUE}
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+          <circle cx="12" cy="12" r="4" stroke={HDFC_BLUE} strokeWidth="1.5" />
         </svg>
       );
     case "invest":
