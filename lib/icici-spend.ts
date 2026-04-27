@@ -106,11 +106,12 @@ export type WeekKey = `w1-${MonthKey}` | `w2-${MonthKey}` | `w3-${MonthKey}` | `
 export function getWeeksForMonth(monthKey: MonthKey): { key: WeekKey; label: string; short: string }[] {
   const monthData = MONTHS.find((m) => m.key === monthKey);
   const monthLabel = monthData?.label ?? monthKey;
+  const isCurrentMonth = monthKey === DEFAULT_MONTH;
   return [
     { key: `w1-${monthKey}` as WeekKey, label: `Week 1, ${monthLabel}`, short: "Week 1" },
     { key: `w2-${monthKey}` as WeekKey, label: `Week 2, ${monthLabel}`, short: "Week 2" },
     { key: `w3-${monthKey}` as WeekKey, label: `Week 3, ${monthLabel}`, short: "Week 3" },
-    { key: `w4-${monthKey}` as WeekKey, label: `Week 4, ${monthLabel}`, short: "Week 4" },
+    { key: `w4-${monthKey}` as WeekKey, label: isCurrentMonth ? `This Week` : `Week 4, ${monthLabel}`, short: isCurrentMonth ? "This Week" : "Week 4" },
   ];
 }
 
