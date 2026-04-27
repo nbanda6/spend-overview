@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ICICI, spendCardClass } from "@/lib/icici-spend";
+import { HDFC, spendCardClass } from "@/lib/icici-spend";
 
 const SERVICE_LIST = [
   {
@@ -7,7 +7,7 @@ const SERVICE_LIST = [
     title: "Spend Overview",
     subtitle: "Track spends by category",
     icon: "donut" as const,
-    accent: ICICI.orangeDark,
+    accent: HDFC.accentBlue,
   },
   {
     href: "#",
@@ -154,7 +154,7 @@ export default function ServicesPage() {
       <header
         className="sticky top-0 z-10 flex items-center gap-3 px-3 pb-3.5 pt-[52px] text-white shadow-md"
         style={{
-          background: `linear-gradient(135deg, ${ICICI.headerFrom} 0%, ${ICICI.headerTo} 100%)`,
+          background: `linear-gradient(180deg, ${HDFC.headerFrom} 0%, ${HDFC.headerTo} 100%)`,
         }}
       >
         <Link
@@ -174,7 +174,7 @@ export default function ServicesPage() {
         </Link>
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/85">
-            iMobile
+            HDFC Bank
           </p>
           <h1 className="text-lg font-semibold leading-tight">Services</h1>
         </div>

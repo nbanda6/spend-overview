@@ -1,19 +1,21 @@
-/** ICICI iMobile–style Spend Overview — shared types & month-based data */
+/** HDFC Bank–style Spend Overview — shared types & month-based data */
 
-export const ICICI = {
-  maroon: "#7A1538",
-  /** Primary accent — aligned with iMobile light theme orange */
-  orange: "#FF6B35",
-  orangeDark: "#E85A28",
+export const HDFC = {
+  /** Primary navy blue */
+  navyBlue: "#004C8F",
+  navyDark: "#00305A",
+  /** Accent blue for interactive elements */
+  accentBlue: "#0066B3",
   oceanBlue: "#0B4A7F",
   teal: "#0F8A8A",
   misc: "#64748B",
-  /** Headers: orange gradient (light-theme prototype) */
-  headerFrom: "#FF7A45",
-  headerTo: "#E85A28",
-  maroonGradientFrom: "#5C0F2A",
-  maroonGradientTo: "#8B1E42",
+  /** Headers: navy gradient */
+  headerFrom: "#004C8F",
+  headerTo: "#00305A",
 } as const;
+
+// Backward compatibility alias
+export const ICICI = HDFC;
 
 export type CategorySlug =
   | "shopping"
@@ -38,33 +40,33 @@ export const CATEGORY_META: Record<
 > = {
   shopping: {
     label: "Shopping",
-    color: ICICI.maroon,
+    color: "#7B2D8E",
     icon: "bag",
     drillHint: "Online & retail purchases",
   },
   "food-dining": {
     label: "Food & Dining",
-    color: ICICI.orange,
+    color: HDFC.accentBlue,
     icon: "fork",
     drillHint: "Groceries, dining & UPI merchants",
   },
   utilities: {
     label: "Utilities",
-    color: ICICI.oceanBlue,
+    color: HDFC.oceanBlue,
     icon: "bulb",
     drillHint: "Bills & subscriptions",
   },
   travel: {
     label: "Travel",
-    color: ICICI.teal,
+    color: HDFC.teal,
     icon: "plane",
     drillHint: "Commute & travel",
   },
   miscellaneous: {
     label: "Miscellaneous",
-    color: ICICI.misc,
+    color: HDFC.misc,
     icon: "misc",
-    drillHint: "Spend we couldn’t auto-categorise",
+    drillHint: "Spend we couldn't auto-categorise",
   },
 };
 

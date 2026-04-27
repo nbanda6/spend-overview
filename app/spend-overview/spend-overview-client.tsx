@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import {
   CATEGORY_META,
   CATEGORY_ORDER,
-  ICICI,
+  HDFC,
   MONTHS,
   type CategoryIconKind,
   type MomChange,
@@ -134,7 +134,7 @@ function Donut({
           </p>
           <p
             className="mt-1 text-center text-lg font-bold tabular-nums leading-tight"
-            style={{ color: ICICI.oceanBlue }}
+            style={{ color: HDFC.navyBlue }}
           >
             {centerLabel}
           </p>
@@ -263,7 +263,7 @@ export function SpendOverviewClient({
         <header
           className="flex items-center gap-3 px-3 pb-3.5 pt-[52px] text-white"
           style={{
-            background: `linear-gradient(135deg, ${ICICI.headerFrom} 0%, ${ICICI.headerTo} 100%)`,
+            background: `linear-gradient(180deg, ${HDFC.headerFrom} 0%, ${HDFC.headerTo} 100%)`,
           }}
         >
           <Link
@@ -283,7 +283,7 @@ export function SpendOverviewClient({
           </Link>
           <div className="flex min-w-0 flex-1 flex-col">
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/80">
-              ICICI Bank
+              HDFC Bank
             </span>
             <h1 className="truncate text-base font-semibold leading-tight">
               Your Spending at a Glance
@@ -316,7 +316,7 @@ export function SpendOverviewClient({
                     : "border border-zinc-200/90 bg-white text-zinc-600 hover:bg-zinc-50"
                 }`}
                 style={
-                  m.key === monthKey ? { backgroundColor: ICICI.orange } : undefined
+                  m.key === monthKey ? { backgroundColor: HDFC.navyBlue } : undefined
                 }
               >
                 {m.short}
@@ -331,17 +331,25 @@ export function SpendOverviewClient({
       </div>
 
       <main className="space-y-4 px-4 pb-10 pt-4">
-        <section className={`${spendCardClass} p-4`} style={spendCardShadow}>
-          <p className="text-xs font-medium text-zinc-500">Total Spends</p>
-          <p
-            className="mt-1 text-3xl font-bold tabular-nums tracking-tight"
-            style={{ color: ICICI.oceanBlue }}
-          >
-            {formatInr(snapshot.total)}
-          </p>
+        <section className={`${spendCardClass} p-5`} style={spendCardShadow}>
+          <div className="flex justify-center">
+            <Donut segments={segments} centerLabel={formatInr(snapshot.total)} />
+          </div>
+          
+          <ul className="mx-auto mt-4 flex max-w-sm flex-wrap justify-center gap-x-3 gap-y-2 text-[11px] text-zinc-600">
+            {CATEGORY_ORDER.map((slug) => (
+              <li key={slug} className="flex items-center gap-1.5">
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: CATEGORY_META[slug].color }}
+                />
+                {CATEGORY_META[slug].label}
+              </li>
+            ))}
+          </ul>
 
           <div
-            className="mt-3 rounded-xl border border-zinc-100 bg-zinc-50/90 px-3 py-2.5"
+            className="mt-4 rounded-xl border border-zinc-100 bg-zinc-50/90 px-3 py-2.5"
             role="status"
             aria-live="polite"
           >
@@ -357,70 +365,7 @@ export function SpendOverviewClient({
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
               <MomPill mom={totalMom} />
             </div>
-            {totalMom.hasPrevious && totalMom.variant === "normal" && totalMom.direction !== "flat" && (
-              <p className="mt-2 text-[11px] leading-snug text-zinc-500">
-                {totalMom.direction === "up"
-                  ? "You spent more overall than the prior month."
-                  : "You spent less overall than the prior month."}
-              </p>
-            )}
           </div>
-        </section>
-
-        <section className={`${spendCardClass} p-5`}>
-          <h2 className="text-center text-sm font-semibold text-zinc-800">
-            Visual breakdown
-          </h2>
-          {previousMonthLabel && totalMom.hasPrevious && totalMom.variant === "normal" && (
-            <p className="mx-auto mt-1 max-w-[280px] text-center text-[11px] leading-relaxed text-zinc-500">
-              {totalMom.direction === "flat" && (
-                <>
-                  Total outflow is about the same as{" "}
-                  <span className="font-medium text-zinc-700">
-                    {previousMonthLabel.replace(" 2026", "")}
-                  </span>
-                </>
-              )}
-              {totalMom.direction === "up" && (
-                <>
-                  Total outflow is{" "}
-                  <span className="font-semibold text-amber-800">
-                    {formatMomPct(totalMom.pct)}% higher
-                  </span>{" "}
-                  than{" "}
-                  <span className="font-medium text-zinc-700">
-                    {previousMonthLabel.replace(" 2026", "")}
-                  </span>
-                </>
-              )}
-              {totalMom.direction === "down" && (
-                <>
-                  Total outflow is{" "}
-                  <span className="font-semibold text-emerald-800">
-                    {formatMomPct(totalMom.pct)}% lower
-                  </span>{" "}
-                  than{" "}
-                  <span className="font-medium text-zinc-700">
-                    {previousMonthLabel.replace(" 2026", "")}
-                  </span>
-                </>
-              )}
-            </p>
-          )}
-          <div className="mt-4 flex justify-center">
-            <Donut segments={segments} centerLabel={formatInr(snapshot.total)} />
-          </div>
-          <ul className="mx-auto mt-4 flex max-w-sm flex-wrap justify-center gap-x-3 gap-y-2 text-[11px] text-zinc-600">
-            {CATEGORY_ORDER.map((slug) => (
-              <li key={slug} className="flex items-center gap-1.5">
-                <span
-                  className="h-2 w-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: CATEGORY_META[slug].color }}
-                />
-                {CATEGORY_META[slug].label}
-              </li>
-            ))}
-          </ul>
         </section>
 
         <section>

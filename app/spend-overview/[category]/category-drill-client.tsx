@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   CATEGORY_META,
-  ICICI,
+  HDFC,
   MONTHS,
   TRANSACTIONS_BY_MONTH,
   type CategorySlug,
@@ -47,7 +47,7 @@ export function CategoryDrillClient({
       <header
         className="sticky top-0 z-10 flex items-center gap-3 px-3 pb-3.5 pt-[52px] text-white shadow-md"
         style={{
-          background: `linear-gradient(135deg, ${ICICI.headerFrom} 0%, ${ICICI.headerTo} 100%)`,
+          background: `linear-gradient(180deg, ${HDFC.headerFrom} 0%, ${HDFC.headerTo} 100%)`,
         }}
       >
         <Link
@@ -93,7 +93,7 @@ export function CategoryDrillClient({
                   ? "border-transparent text-white shadow-sm"
                   : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
               }`}
-              style={filter === f ? { backgroundColor: ICICI.orange } : undefined}
+              style={filter === f ? { backgroundColor: HDFC.navyBlue } : undefined}
             >
               {f}
             </button>
