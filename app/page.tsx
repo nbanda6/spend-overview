@@ -8,8 +8,8 @@ const GRID_ITEMS = [
   { lines: ["Money", "Transfer"], icon: "transfer", href: "#" },
   { lines: ["Add Payee"], icon: "accounts", href: "#" },
   { lines: ["Scan & Pay"], icon: "upi", href: "#" },
-  { lines: ["Recharge"], icon: "bill", href: "#" },
-  { lines: ["UPI", "Payment"], icon: "upi", href: "#" },
+  { lines: ["Recharge"], icon: "recharge", href: "#" },
+  { lines: ["UPI", "Payment"], icon: "upipay", href: "#" },
   { lines: ["Spends", "Overview"], icon: "spends", href: "/spend-overview?from=home" },
   { lines: ["Services"], icon: "services", href: "/services" },
 ] as const;
