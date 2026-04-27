@@ -92,61 +92,6 @@ function CategoryIcon({ kind }: { kind: CategoryIconKind }) {
   }
 }
 
-function Donut({
-  segments,
-  centerLabel,
-}: {
-  segments: { color: string; pct: number }[];
-  centerLabel: string;
-}) {
-  const { stops } = segments.reduce(
-    (out, s) => {
-      const start = out.acc;
-      const end = out.acc + s.pct;
-      const piece = `${s.color} ${start * 100}% ${end * 100}%`;
-      return {
-        acc: end,
-        stops: out.stops ? `${out.stops}, ${piece}` : piece,
-      };
-    },
-    { acc: 0, stops: "" as string },
-  );
-
-  return (
-    <div className="flex flex-col items-center">
-      <div
-        className="relative h-[220px] w-[220px]"
-        role="img"
-        aria-label="Spending breakdown by category"
-      >
-        <div
-          className="absolute inset-0 rounded-full shadow-inner"
-          style={{
-            background:
-              segments.length > 0 && segments.some((s) => s.pct > 0)
-                ? `conic-gradient(${stops})`
-                : "#e4e4e7",
-          }}
-        />
-        <div
-          className="absolute inset-[22%] flex flex-col items-center justify-center rounded-full bg-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]"
-          style={{ border: "1px solid rgba(0,0,0,0.06)" }}
-        >
-          <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">
-            Total outflow
-          </p>
-          <p
-            className="mt-1 text-center text-lg font-bold tabular-nums leading-tight"
-            style={{ color: HDFC.navyBlue }}
-          >
-            {centerLabel}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function MomPill({ mom, periodLabel = "month" }: { mom: MomChange; periodLabel?: string }) {
   if (!mom.hasPrevious) {
     return (
@@ -256,15 +201,6 @@ export function SpendOverviewClient({
     return getSpendInsight(monthKey);
   }, [monthKey, viewPeriod, weekNum]);
   const { snapshot, previousMonthLabel, totalMom, categoryMom } = insight;
-
-  const segments = useMemo(() => {
-    const total = snapshot.total;
-    if (total <= 0) return [];
-    return CATEGORY_ORDER.map((slug) => ({
-      color: CATEGORY_META[slug].color,
-      pct: snapshot.categories[slug] / total,
-    }));
-  }, [snapshot]);
 
   return (
     <div
@@ -406,24 +342,23 @@ export function SpendOverviewClient({
 
       <main className="space-y-4 px-4 pb-10 pt-4">
         <section className={`${spendCardClass} p-5`} style={spendCardShadow}>
-          <div className="flex justify-center">
-            <Donut segments={segments} centerLabel={formatInr(snapshot.total)} />
+          <div className="flex flex-col items-center text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+              Total Spends
+            </p>
+            <p
+              className="mt-2 text-3xl font-bold tabular-nums"
+              style={{ color: HDFC.navyBlue }}
+            >
+              {formatInr(snapshot.total)}
+            </p>
+            <p className="mt-1 text-xs text-zinc-500">
+              {snapshot.monthLabel}
+            </p>
           </div>
-          
-          <ul className="mx-auto mt-4 flex max-w-sm flex-wrap justify-center gap-x-3 gap-y-2 text-[11px] text-zinc-600">
-            {CATEGORY_ORDER.map((slug) => (
-              <li key={slug} className="flex items-center gap-1.5">
-                <span
-                  className="h-2 w-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: CATEGORY_META[slug].color }}
-                />
-                {CATEGORY_META[slug].label}
-              </li>
-            ))}
-          </ul>
 
           <div
-            className="mt-4 rounded-xl border border-zinc-100 bg-zinc-50/90 px-3 py-2.5"
+            className="mt-5 rounded-xl border border-zinc-100 bg-zinc-50/90 px-4 py-3"
             role="status"
             aria-live="polite"
           >
