@@ -99,6 +99,106 @@ export type MonthKey = (typeof MONTH_KEYS)[number];
 
 export const DEFAULT_MONTH: MonthKey = "apr2026";
 
+export type ViewPeriod = "weekly" | "monthly";
+
+export type WeekKey = `w1-${MonthKey}` | `w2-${MonthKey}` | `w3-${MonthKey}` | `w4-${MonthKey}`;
+
+export function getWeeksForMonth(monthKey: MonthKey): { key: WeekKey; label: string; short: string }[] {
+  const monthData = MONTHS.find((m) => m.key === monthKey);
+  const monthLabel = monthData?.label ?? monthKey;
+  return [
+    { key: `w1-${monthKey}` as WeekKey, label: `Week 1, ${monthLabel}`, short: "Week 1" },
+    { key: `w2-${monthKey}` as WeekKey, label: `Week 2, ${monthLabel}`, short: "Week 2" },
+    { key: `w3-${monthKey}` as WeekKey, label: `Week 3, ${monthLabel}`, short: "Week 3" },
+    { key: `w4-${monthKey}` as WeekKey, label: `Week 4, ${monthLabel}`, short: "Week 4" },
+  ];
+}
+
+export function parseWeekKey(value: string | undefined | null, monthKey: MonthKey): WeekKey {
+  if (value && value.startsWith("w") && value.includes(monthKey)) {
+    return value as WeekKey;
+  }
+  return `w4-${monthKey}` as WeekKey;
+}
+
+function getWeekNumber(dateStr: string): number {
+  // Parse date like "18 Apr 2026"
+  const day = parseInt(dateStr.split(" ")[0], 10);
+  if (day <= 7) return 1;
+  if (day <= 14) return 2;
+  if (day <= 21) return 3;
+  return 4;
+}
+
+export function getWeeklySpendSnapshot(monthKey: MonthKey, weekNum: number): SpendSnapshot {
+  const txMap = TRANSACTIONS_BY_MONTH[monthKey];
+  const categories = {} as Record<CategorySlug, number>;
+  const weekTransactions = {} as Record<CategorySlug, TxRow[]>;
+  
+  for (const slug of CATEGORY_ORDER) {
+    const weekTxs = txMap[slug].filter((tx) => getWeekNumber(tx.date) === weekNum);
+    weekTransactions[slug] = weekTxs;
+    categories[slug] = weekTxs.reduce((s, t) => s + t.amount, 0);
+  }
+  
+  const total = CATEGORY_ORDER.reduce((sum, k) => sum + categories[k], 0);
+  const monthLabel = MONTHS.find((m) => m.key === monthKey)?.label ?? monthKey;
+  const weekLabel = `Week ${weekNum}, ${monthLabel}`;
+  
+  return { monthKey, monthLabel: weekLabel, total, categories, transactions: weekTransactions };
+}
+
+export function getWeeklySpendInsight(monthKey: MonthKey, weekNum: number): SpendInsight {
+  const snapshot = getWeeklySpendSnapshot(monthKey, weekNum);
+  
+  // Compare with previous week
+  let prevSnapshot: SpendSnapshot | null = null;
+  if (weekNum > 1) {
+    prevSnapshot = getWeeklySpendSnapshot(monthKey, weekNum - 1);
+  } else {
+    // Get previous month's week 4
+    const prevMonthKey = getPreviousMonthKey(monthKey);
+    if (prevMonthKey) {
+      prevSnapshot = getWeeklySpendSnapshot(prevMonthKey, 4);
+    }
+  }
+  
+  if (!prevSnapshot) {
+    const empty: MomChange = {
+      hasPrevious: false,
+      direction: "flat",
+      pct: 0,
+      variant: "normal",
+    };
+    return {
+      snapshot,
+      previousMonthKey: null,
+      previousMonthLabel: null,
+      totalMom: empty,
+      categoryMom: Object.fromEntries(
+        CATEGORY_ORDER.map((s) => [s, { ...empty }]),
+      ) as Record<CategorySlug, MomChange>,
+    };
+  }
+  
+  const totalMom = computeMomChange(snapshot.total, prevSnapshot.total);
+  const categoryMom = {} as Record<CategorySlug, MomChange>;
+  for (const slug of CATEGORY_ORDER) {
+    categoryMom[slug] = computeMomChange(
+      snapshot.categories[slug],
+      prevSnapshot.categories[slug],
+    );
+  }
+  
+  return {
+    snapshot,
+    previousMonthKey: null,
+    previousMonthLabel: prevSnapshot.monthLabel,
+    totalMom,
+    categoryMom,
+  };
+}
+
 export const MONTHS: { key: MonthKey; label: string; short: string }[] = [
   { key: "may2025", label: "May 2025", short: "May '25" },
   { key: "jun2025", label: "June 2025", short: "Jun '25" },
