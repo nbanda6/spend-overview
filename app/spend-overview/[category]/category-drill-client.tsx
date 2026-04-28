@@ -1,43 +1,44 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   CATEGORY_META,
   HDFC,
-  MONTHS,
-  TRANSACTIONS_BY_MONTH,
   type CategorySlug,
+  type CustomDateRange,
   type MonthKey,
+  type TimeFilter,
   formatInr,
+  getFilteredCategoryTransactions,
+  getFilteredSpendData,
   spendCardClass,
 } from "@/lib/icici-spend";
-
-const FILTERS = ["Last 7 Days", "This Month", "Custom Range"] as const;
 
 export function CategoryDrillClient({
   slug,
   monthKey,
-  fromSource,
+  timeFilter,
+  customRange,
+  periodQuery,
 }: {
   slug: CategorySlug;
   monthKey: MonthKey;
-  fromSource: string;
+  timeFilter: TimeFilter;
+  customRange: CustomDateRange | null;
+  periodQuery: string;
 }) {
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]>("This Month");
   const cat = CATEGORY_META[slug];
-  const rows = TRANSACTIONS_BY_MONTH[monthKey][slug];
 
-  const monthLabel = useMemo(
-    () => MONTHS.find((x) => x.key === monthKey)?.label ?? monthKey,
-    [monthKey],
+  const rows = useMemo(
+    () => getFilteredCategoryTransactions(slug, timeFilter, monthKey, customRange),
+    [slug, timeFilter, monthKey, customRange],
   );
 
-  const subtitle = useMemo(() => {
-    if (filter === "Last 7 Days") return `Last 7 days · ${monthLabel}`;
-    if (filter === "This Month") return monthLabel;
-    return "Pick a custom range";
-  }, [filter, monthLabel]);
+  const periodLabel = useMemo(
+    () => getFilteredSpendData(timeFilter, monthKey, customRange).label,
+    [timeFilter, monthKey, customRange],
+  );
 
   return (
     <div
@@ -51,7 +52,7 @@ export function CategoryDrillClient({
         }}
       >
         <Link
-          href={`/spend-overview?m=${monthKey}&from=${fromSource}`}
+          href={`/spend-overview?${periodQuery}`}
           className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10"
           aria-label="Back to Spend Overview"
         >
@@ -78,29 +79,13 @@ export function CategoryDrillClient({
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
           Period
         </p>
-        <p className="mt-1 text-sm font-medium text-zinc-800">{monthLabel}</p>
+        <p className="mt-1 text-sm font-medium text-zinc-800">{periodLabel}</p>
+        <p className="mt-1 text-[11px] leading-snug text-zinc-500">
+          Matches the period selected on Spend Overview.
+        </p>
       </div>
 
       <div className="px-4 pb-10 pt-4">
-        <div className="flex gap-2 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              type="button"
-              onClick={() => setFilter(f)}
-              className={`shrink-0 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors ${
-                filter === f
-                  ? "border-transparent text-white shadow-sm"
-                  : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
-              }`}
-              style={filter === f ? { backgroundColor: HDFC.navyBlue } : undefined}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-        <p className="mb-3 text-xs text-zinc-500">{subtitle}</p>
-
         <ul className={`overflow-hidden ${spendCardClass}`}>
           {rows.map((tx, i) => (
             <li
@@ -108,7 +93,7 @@ export function CategoryDrillClient({
               className="border-b border-zinc-100 last:border-0"
             >
               <Link
-                href={`/spend-overview/${slug}/${i}?m=${monthKey}&from=${fromSource}`}
+                href={`/spend-overview/${slug}/${i}?${periodQuery}`}
                 className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors active:bg-zinc-50"
               >
                 <span
@@ -150,16 +135,16 @@ export function CategoryDrillClient({
           ))}
         </ul>
 
-        {slug === "miscellaneous" && (
-          <p className="mt-4 rounded-xl border border-zinc-200/90 bg-white px-4 py-3 text-sm leading-relaxed text-zinc-600">
-            These debits could not be matched to a merchant category (e.g. unknown POS, fees, or
-            one-off UPI beneficiaries). You can recategorise them in a full banking app.
+        {rows.length === 0 && (
+          <p className="mt-4 rounded-xl border border-zinc-200/90 bg-white px-4 py-6 text-center text-sm text-zinc-500">
+            No transactions in this category for the selected period.
           </p>
         )}
 
-        {filter === "Custom Range" && (
-          <p className="mt-4 rounded-xl border border-dashed border-zinc-300 bg-white px-4 py-6 text-center text-sm text-zinc-500">
-            In a full app, a date picker would open here.
+        {slug === "miscellaneous" && rows.length > 0 && (
+          <p className="mt-4 rounded-xl border border-zinc-200/90 bg-white px-4 py-3 text-sm leading-relaxed text-zinc-600">
+            These debits could not be matched to a merchant category (e.g. unknown POS, fees, or
+            one-off UPI beneficiaries). You can recategorise them in a full banking app.
           </p>
         )}
       </div>

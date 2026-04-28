@@ -3,6 +3,11 @@
  * Aspect ratio: 2.086:1 (height to width)
  * Screen logical pixels based on standard iOS scaling
  */
+import {
+  IPHONE_APP_OVERLAY_ROOT_ID,
+  IPHONE_APP_SCROLL_ROOT_ID,
+} from "@/app/components/iphone-app-shell-ids";
+
 const IPHONE_17 = {
   widthPx: 375,
   heightPx: 812,
@@ -73,9 +78,17 @@ export function Ios17DeviceFrame({ children }: { children: React.ReactNode }) {
           >
             {/* Main content area - content starts from top, dynamic island overlays */}
             <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-              <div className="ios-app-scroll flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
+              <div
+                id={IPHONE_APP_SCROLL_ROOT_ID}
+                className="ios-app-scroll flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]"
+              >
                 {children}
               </div>
+              {/* Modals / assistant — same bounds as the screen, does not scroll with the page */}
+              <div
+                id={IPHONE_APP_OVERLAY_ROOT_ID}
+                className="pointer-events-none absolute inset-0 z-[100] [&>*]:pointer-events-auto"
+              />
             </div>
 
             {/* Home indicator */}

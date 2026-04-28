@@ -1,4 +1,9 @@
-import { parseMonthKey } from "@/lib/icici-spend";
+import {
+  getMonthDateRangeIso,
+  parseCustomRangeFromSearch,
+  parseMonthKey,
+  parseTimeFilter,
+} from "@/lib/icici-spend";
 import { SpendOverviewClient } from "./spend-overview-client";
 
 export const metadata = {
@@ -9,12 +14,24 @@ export const metadata = {
 export default async function SpendOverviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ m?: string; from?: string }>;
+  searchParams: Promise<{ m?: string; from?: string; f?: string; start?: string; end?: string }>;
 }) {
-  const { m, from } = await searchParams;
-  const monthKey = parseMonthKey(m);
-  const backHref = from === "home" ? "/" : "/services";
+  const sp = await searchParams;
+  const monthKey = parseMonthKey(sp.m);
+  const backHref = sp.from === "home" ? "/" : "/services";
+  const initialTimeFilter = parseTimeFilter(sp.f);
+  const initialCustomRange =
+    initialTimeFilter === "custom"
+      ? parseCustomRangeFromSearch(sp.start, sp.end) ?? getMonthDateRangeIso(monthKey)
+      : undefined;
+
   return (
-    <SpendOverviewClient key={monthKey} initialMonthKey={monthKey} backHref={backHref} fromSource={from ?? "services"} />
+    <SpendOverviewClient
+      initialMonthKey={monthKey}
+      initialTimeFilter={initialTimeFilter}
+      initialCustomRange={initialCustomRange}
+      backHref={backHref}
+      fromSource={sp.from ?? "services"}
+    />
   );
 }
