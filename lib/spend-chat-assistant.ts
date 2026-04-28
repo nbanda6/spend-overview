@@ -752,6 +752,28 @@ function parseTopN(q: string): number | null {
   return null;
 }
 
+/** Exported for LLM context — user wants smallest/largest debit by amount. */
+export function detectSpendChatSuperlative(q: string): {
+  largest: boolean;
+  smallest: boolean;
+} {
+  return detectSuperlative(q);
+}
+
+/** User is asking for an extreme by amount (not a full-period summary). */
+function detectSuperlative(q: string): {
+  largest: boolean;
+  smallest: boolean;
+} {
+  const s = q.trim();
+  return {
+    largest:
+      /\b(largest|biggest|highest|most\s+expensive|priciest|max(?:imum)?)\b/i.test(s),
+    smallest:
+      /\b(smallest|lowest|cheapest|least|minimum|tiniest)\b/i.test(s),
+  };
+}
+
 type Channel = NonNullable<TxRow["channel"]>;
 
 function detectChannel(q: string): Channel | null {
@@ -763,7 +785,7 @@ function detectChannel(q: string): Channel | null {
 
 function merchantTokens(q: string): string[] {
   const stop = new Set(
-    "the a an my your our me we us it there their one any show list all transactions spending spend spent for in on at of to from how what when where why top largest smallest biggest highest lowest summary overview summaries summarize summarise period month week weeks day days year years past current previous calendar during between through until starting ending selected selection asked specify bar filter demo data payment payments pay paytm about same page message transaction".split(
+    "the a an my your our me we us it there their one any show list all transactions spending spend spent for in on at of to from how what when where why top largest smallest biggest highest lowest summary overview summaries summarize summarise period month week weeks day days year years past current previous calendar during between through until starting ending selected selection asked specify bar filter demo data payment payments pay paytm about same page message transaction made period single".split(
       " ",
     ),
   );
@@ -827,7 +849,11 @@ export function runSpendChatQuery(
   const topN = parseTopN(qRaw);
   const tokens = merchantTokens(qRaw);
 
+  const { largest: superlativeLargest, smallest: superlativeSmallest } = detectSuperlative(qRaw);
+  const superlativeIntent = superlativeLargest || superlativeSmallest;
+
   const summaryLike =
+    !superlativeIntent &&
     /\b(summarize|summarise|summary|overview|breakdown|how much|total spend|spend total|totals?|this\s+period)\b/i.test(
       qRaw,
     );
@@ -856,12 +882,12 @@ export function runSpendChatQuery(
     });
   }
 
-  if (/\b(largest|biggest|highest|max|expensive)\b/i.test(qRaw)) {
+  if (superlativeLargest) {
     working.sort((a, b) => b.tx.amount - a.tx.amount);
-    working = working.slice(0, topN ?? 10);
-  } else if (/\b(smallest|lowest|min|cheapest)\b/i.test(qRaw)) {
+    working = working.slice(0, topN ?? 1);
+  } else if (superlativeSmallest) {
     working.sort((a, b) => a.tx.amount - b.tx.amount);
-    working = working.slice(0, topN ?? 10);
+    working = working.slice(0, topN ?? 1);
   } else if (topN) {
     working.sort((a, b) => b.tx.amount - a.tx.amount);
     working = working.slice(0, topN);
@@ -904,40 +930,64 @@ export function runSpendChatQuery(
   }
 
   let reply = "";
-  const listIntent = /\b(show|list)\b/i.test(qRaw);
-  const questionIntent = /\?\s*$/.test(qRaw);
-  if (listIntent && !questionIntent) {
-    reply += "Listed below — ";
-  } else if (
-    questionIntent &&
-    /\b(how much|what did|where|which|did i)\b/i.test(qRaw) &&
-    !summaryLike
-  ) {
-    reply += "Here’s the answer from your data — ";
-  }
+  if (superlativeIntent && working.length === 1) {
+    const e = working[0]!;
+    const label = superlativeLargest ? "Largest" : "Smallest";
+    reply = `${label} payment in ${periodName}: ${formatInr(e.tx.amount)} to ${e.tx.merchant} on ${e.tx.date}${e.tx.channel ? ` · ${e.tx.channel}` : ""}.`;
+  } else if (superlativeIntent && working.length > 1) {
+    const ord = superlativeLargest ? "largest" : "smallest";
+    reply = `The ${working.length} ${ord} debits in ${periodName} are listed below.`;
+  } else {
+    const listIntent = /\b(show|list)\b/i.test(qRaw);
+    const questionIntent = /\?\s*$/.test(qRaw);
+    if (listIntent && !questionIntent) {
+      reply += "Listed below — ";
+    } else if (
+      questionIntent &&
+      /\b(how much|what did|where|which|did i|what was|which was)\b/i.test(qRaw) &&
+      !summaryLike
+    ) {
+      reply += "Here’s the answer from your data — ";
+    }
 
-  reply += `Found ${working.length} matching transaction${working.length !== 1 ? "s" : ""} for ${periodName}`;
-  if (slugsFilter.length === 1) {
-    reply += ` · ${CATEGORY_META[slugsFilter[0]!].label}`;
-  }
-  if (channel) reply += ` · ${channel}`;
-  reply += ".";
-
-  const grouped = new Map<CategorySlug, FlatEntry[]>();
-  for (const slug of CATEGORY_ORDER) grouped.set(slug, []);
-  for (const e of working) {
-    grouped.get(e.slug)!.push(e);
+    reply += `Found ${working.length} matching transaction${working.length !== 1 ? "s" : ""} for ${periodName}`;
+    if (slugsFilter.length === 1) {
+      reply += ` · ${CATEGORY_META[slugsFilter[0]!].label}`;
+    }
+    if (channel) reply += ` · ${channel}`;
+    reply += ".";
   }
 
   const sections: ChatSection[] = [];
-  for (const slug of CATEGORY_ORDER) {
-    const list = grouped.get(slug) ?? [];
-    if (list.length === 0) continue;
+  if (superlativeIntent && working.length === 1) {
+    const e = working[0]!;
     sections.push({
-      title: CATEGORY_META[slug].label,
-      subtitle: `${list.length} item${list.length !== 1 ? "s" : ""}`,
-      items: withLinks(list, searchMonths, fromSource),
+      title: superlativeLargest ? "Largest payment" : "Smallest payment",
+      subtitle: `${CATEGORY_META[e.slug].label} · ${periodName}`,
+      items: withLinks([e], searchMonths, fromSource),
     });
+  } else {
+    const grouped = new Map<CategorySlug, FlatEntry[]>();
+    for (const slug of CATEGORY_ORDER) grouped.set(slug, []);
+    for (const e of working) {
+      grouped.get(e.slug)!.push(e);
+    }
+
+    for (const slug of CATEGORY_ORDER) {
+      const list = grouped.get(slug) ?? [];
+      if (list.length === 0) continue;
+      const sub =
+        superlativeIntent && working.length > 1
+          ? superlativeLargest
+            ? "Among the largest debits"
+            : "Among the smallest debits"
+          : `${list.length} item${list.length !== 1 ? "s" : ""}`;
+      sections.push({
+        title: CATEGORY_META[slug].label,
+        subtitle: sub,
+        items: withLinks(list, searchMonths, fromSource),
+      });
+    }
   }
 
   return wrapOutcome(
@@ -977,6 +1027,9 @@ export function getSpendChatLlmPack(
     })),
   );
 
+  const supForHints = detectSpendChatSuperlative(query.trim());
+  const topNForHints = parseTopN(query.trim());
+
   const topByAmount = [...flat]
     .sort((a, b) => b.tx.amount - a.tx.amount)
     .slice(0, 35)
@@ -1013,6 +1066,24 @@ export function getSpendChatLlmPack(
     },
     transactionsMatchingQuestion: txsFromSections.slice(0, 100),
     topTransactionsByAmountInPeriod: topByAmount,
+    answerHints: {
+      superlative:
+        supForHints.largest && !supForHints.smallest
+          ? "largest"
+          : supForHints.smallest && !supForHints.largest
+            ? "smallest"
+            : supForHints.largest && supForHints.smallest
+              ? "both"
+              : "none",
+      listedRowCount: txsFromSections.length,
+      userAskedTopN: topNForHints,
+      instruction:
+        (supForHints.largest || supForHints.smallest) && topNForHints == null
+          ? "The user is asking for an extreme payment (highest or lowest). If only one transaction is listed under transactionsMatchingQuestion, your narrative must focus on that single row (merchant, INR amount, date, channel) and must not read like a full category breakdown."
+          : (supForHints.largest || supForHints.smallest) && topNForHints != null
+            ? `The user asked for the top ${topNForHints} by amount; keep the story short and match those rows only.`
+            : null,
+    },
   };
 
   return { outcome, contextJson };

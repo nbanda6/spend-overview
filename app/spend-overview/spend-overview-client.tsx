@@ -632,26 +632,43 @@ export function SpendOverviewClient({
                       ? computeMomChange(p.amount, p.previousAmount)
                       : null;
                   return (
-                    <li key={p.type} className="flex items-center gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600">
-                        <PaymentTypeIcon type={p.type} />
-                      </span>
-                      <span className="flex-1 text-sm font-medium text-zinc-700">
-                        {PAYMENT_TYPE_META[p.type].label}
-                      </span>
-                      <span className="text-sm font-semibold tabular-nums text-zinc-900">
-                        {formatInr(p.amount)}
-                      </span>
-                      {trend && trend.hasPrevious && trend.direction !== "flat" && (
-                        <span
-                          className={`text-[11px] font-semibold tabular-nums ${
-                            trend.direction === "up" ? "text-amber-600" : "text-emerald-600"
-                          }`}
-                        >
-                          {trend.direction === "up" ? "↑" : "↓"}
-                          {formatMomPct(trend.pct)}%
+                    <li key={p.type}>
+                      <Link
+                        href={`/spend-overview/payment/${p.type}?${periodQuery}`}
+                        className="flex items-center gap-3 rounded-xl py-1.5 pl-1 pr-0 -mx-1 active:bg-zinc-50/90 outline-none focus-visible:ring-2 focus-visible:ring-[#004C8F]/25"
+                        aria-label={`${PAYMENT_TYPE_META[p.type].label}, ${formatInr(p.amount)} — view transactions`}
+                      >
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600">
+                          <PaymentTypeIcon type={p.type} />
                         </span>
-                      )}
+                        <span className="flex-1 text-sm font-medium text-zinc-700">
+                          {PAYMENT_TYPE_META[p.type].label}
+                        </span>
+                        <span className="text-sm font-semibold tabular-nums text-zinc-900">
+                          {formatInr(p.amount)}
+                        </span>
+                        {trend && trend.hasPrevious && trend.direction !== "flat" && (
+                          <span
+                            className={`text-[11px] font-semibold tabular-nums ${
+                              trend.direction === "up" ? "text-amber-600" : "text-emerald-600"
+                            }`}
+                          >
+                            {trend.direction === "up" ? "↑" : "↓"}
+                            {formatMomPct(trend.pct)}%
+                          </span>
+                        )}
+                        <span className="text-zinc-300" aria-hidden>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path
+                              d="M9 6l6 6-6 6"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
+                      </Link>
                     </li>
                   );
                 })}

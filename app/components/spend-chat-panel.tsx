@@ -65,7 +65,7 @@ export function SpendChatPanel({
     {
       id: "welcome",
       role: "assistant",
-      text: `Ask about spending for your selected time filter — totals, categories, payment mode, or merchants. Answers use your overview data; with ANTHROPIC_API_KEY set, Claude refines the reply while transaction rows stay grounded in the same matcher.`,
+      text: `Ask about this period’s spending — totals, categories, how you paid, or a specific merchant. Replies use the same data as your Spend Overview, and you can open any listed transaction for details.`,
     },
   ]);
 
@@ -194,7 +194,7 @@ export function SpendChatPanel({
               Spent AI assistant
             </p>
             <p className="truncate text-[11px] text-white/75">
-              Your filters + typed ranges · Claude when API key is set
+              Uses your filters and date range from this screen
             </p>
           </div>
           <button

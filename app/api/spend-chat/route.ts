@@ -54,6 +54,7 @@ Rules:
 - If CONTEXT shows no matching transactions but aggregates exist, explain the mismatch briefly (filters / wording).
 - If timeWindowNote appears, mention it once.
 - The app UI lists **transaction rows first**, then your **narrative**, then the **Summary** strip — avoid phrases like “below” or “above” for the list; say “these transactions” or “this period” instead.
+- If CONTEXT.answerHints.instruction is present, follow it (especially for “largest/smallest” questions — do not write a full breakdown when a single row answers the question).
 - Be concise and helpful: answer the user's question directly.
 - Respond with **valid JSON only**, no prose outside JSON, markdown fences optional:
   {"narrative":"...", "summary":"..."}
