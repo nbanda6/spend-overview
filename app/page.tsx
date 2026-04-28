@@ -4,14 +4,14 @@ import { GridIcon } from "@/app/components/home-grid-icons";
 import { HDFC } from "@/app/theme/icici-light";
 
 const GRID_ITEMS = [
-  { lines: ["Bill", "Payments"], icon: "bill", href: "#" },
-  { lines: ["Money", "Transfer"], icon: "transfer", href: "#" },
-  { lines: ["Add Payee"], icon: "accounts", href: "#" },
-  { lines: ["Scan & Pay"], icon: "upi", href: "#" },
-  { lines: ["Spends", "Overview"], icon: "spends", href: "/spend-overview?from=home" },
-  { lines: ["UPI", "Payment"], icon: "upipay", href: "#" },
-  { lines: ["Recharge"], icon: "recharge", href: "#" },
-  { lines: ["Services"], icon: "services", href: "/services" },
+  { lines: ["Bill", "Payments"], icon: "bill", href: "#", isNew: false },
+  { lines: ["Money", "Transfer"], icon: "transfer", href: "#", isNew: false },
+  { lines: ["Add Payee"], icon: "accounts", href: "#", isNew: false },
+  { lines: ["Scan & Pay"], icon: "upi", href: "#", isNew: false },
+  { lines: ["Spends", "Overview"], icon: "spends", href: "/spend-overview?from=home", isNew: true },
+  { lines: ["UPI", "Payment"], icon: "upipay", href: "#", isNew: false },
+  { lines: ["Recharge"], icon: "recharge", href: "#", isNew: false },
+  { lines: ["Services"], icon: "services", href: "/services", isNew: false },
 ] as const;
 
 function StatusBar() {
@@ -136,10 +136,20 @@ export default function HomePage() {
             {GRID_ITEMS.map((tile) => {
               const inner = (
                 <>
-                  <div 
-                    className="mb-2 flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-zinc-100 text-zinc-700"
-                  >
-                    <GridIcon kind={tile.icon} />
+                  <div className="relative mb-2">
+                    <div 
+                      className="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-zinc-100 text-zinc-700"
+                    >
+                      <GridIcon kind={tile.icon} />
+                    </div>
+                    {tile.isNew && (
+                      <span 
+                        className="absolute -right-2 -top-1.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-sm"
+                        style={{ backgroundColor: HDFC.accentBlue }}
+                      >
+                        New
+                      </span>
+                    )}
                   </div>
                   <div className="text-center text-[11px] font-medium leading-snug text-zinc-700">
                     {tile.lines.map((line) => (

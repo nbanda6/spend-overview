@@ -99,6 +99,107 @@ export type MonthKey = (typeof MONTH_KEYS)[number];
 
 export const DEFAULT_MONTH: MonthKey = "apr2026";
 
+export type ViewPeriod = "weekly" | "monthly";
+
+export type WeekKey = `w1-${MonthKey}` | `w2-${MonthKey}` | `w3-${MonthKey}` | `w4-${MonthKey}`;
+
+export function getWeeksForMonth(monthKey: MonthKey): { key: WeekKey; label: string; short: string }[] {
+  const monthData = MONTHS.find((m) => m.key === monthKey);
+  const monthLabel = monthData?.label ?? monthKey;
+  const isCurrentMonth = monthKey === DEFAULT_MONTH;
+  return [
+    { key: `w1-${monthKey}` as WeekKey, label: `Week 1, ${monthLabel}`, short: "Week 1" },
+    { key: `w2-${monthKey}` as WeekKey, label: `Week 2, ${monthLabel}`, short: "Week 2" },
+    { key: `w3-${monthKey}` as WeekKey, label: `Week 3, ${monthLabel}`, short: "Week 3" },
+    { key: `w4-${monthKey}` as WeekKey, label: isCurrentMonth ? `This Week` : `Week 4, ${monthLabel}`, short: isCurrentMonth ? "This Week" : "Week 4" },
+  ];
+}
+
+export function parseWeekKey(value: string | undefined | null, monthKey: MonthKey): WeekKey {
+  if (value && value.startsWith("w") && value.includes(monthKey)) {
+    return value as WeekKey;
+  }
+  return `w4-${monthKey}` as WeekKey;
+}
+
+function getWeekNumber(dateStr: string): number {
+  // Parse date like "18 Apr 2026"
+  const day = parseInt(dateStr.split(" ")[0], 10);
+  if (day <= 7) return 1;
+  if (day <= 14) return 2;
+  if (day <= 21) return 3;
+  return 4;
+}
+
+export function getWeeklySpendSnapshot(monthKey: MonthKey, weekNum: number): SpendSnapshot {
+  const txMap = TRANSACTIONS_BY_MONTH[monthKey];
+  const categories = {} as Record<CategorySlug, number>;
+  const weekTransactions = {} as Record<CategorySlug, TxRow[]>;
+  
+  for (const slug of CATEGORY_ORDER) {
+    const weekTxs = txMap[slug].filter((tx) => getWeekNumber(tx.date) === weekNum);
+    weekTransactions[slug] = weekTxs;
+    categories[slug] = weekTxs.reduce((s, t) => s + t.amount, 0);
+  }
+  
+  const total = CATEGORY_ORDER.reduce((sum, k) => sum + categories[k], 0);
+  const monthLabel = MONTHS.find((m) => m.key === monthKey)?.label ?? monthKey;
+  const weekLabel = `Week ${weekNum}, ${monthLabel}`;
+  
+  return { monthKey, monthLabel: weekLabel, total, categories, transactions: weekTransactions };
+}
+
+export function getWeeklySpendInsight(monthKey: MonthKey, weekNum: number): SpendInsight {
+  const snapshot = getWeeklySpendSnapshot(monthKey, weekNum);
+  
+  // Compare with previous week
+  let prevSnapshot: SpendSnapshot | null = null;
+  if (weekNum > 1) {
+    prevSnapshot = getWeeklySpendSnapshot(monthKey, weekNum - 1);
+  } else {
+    // Get previous month's week 4
+    const prevMonthKey = getPreviousMonthKey(monthKey);
+    if (prevMonthKey) {
+      prevSnapshot = getWeeklySpendSnapshot(prevMonthKey, 4);
+    }
+  }
+  
+  if (!prevSnapshot) {
+    const empty: MomChange = {
+      hasPrevious: false,
+      direction: "flat",
+      pct: 0,
+      variant: "normal",
+    };
+    return {
+      snapshot,
+      previousMonthKey: null,
+      previousMonthLabel: null,
+      totalMom: empty,
+      categoryMom: Object.fromEntries(
+        CATEGORY_ORDER.map((s) => [s, { ...empty }]),
+      ) as Record<CategorySlug, MomChange>,
+    };
+  }
+  
+  const totalMom = computeMomChange(snapshot.total, prevSnapshot.total);
+  const categoryMom = {} as Record<CategorySlug, MomChange>;
+  for (const slug of CATEGORY_ORDER) {
+    categoryMom[slug] = computeMomChange(
+      snapshot.categories[slug],
+      prevSnapshot.categories[slug],
+    );
+  }
+  
+  return {
+    snapshot,
+    previousMonthKey: null,
+    previousMonthLabel: prevSnapshot.monthLabel,
+    totalMom,
+    categoryMom,
+  };
+}
+
 export const MONTHS: { key: MonthKey; label: string; short: string }[] = [
   { key: "may2025", label: "May 2025", short: "May '25" },
   { key: "jun2025", label: "June 2025", short: "Jun '25" },
@@ -745,3 +846,358 @@ export function isCategorySlug(s: string): s is CategorySlug {
 export const spendCardClass =
   "rounded-2xl border border-zinc-200/90 bg-white shadow-sm";
 export const spendCardShadow = { boxShadow: "0 4px 14px rgba(0,0,0,0.06)" } as const;
+
+/** Payment types breakdown */
+export type PaymentType = "upi" | "credit" | "transfer" | "debit";
+
+export const PAYMENT_TYPE_META: Record<PaymentType, { label: string; icon: string }> = {
+  upi: { label: "UPI", icon: "upi" },
+  credit: { label: "Credit Card", icon: "credit" },
+  transfer: { label: "Transfer", icon: "transfer" },
+  debit: { label: "Debit Card", icon: "debit" },
+};
+
+export type PaymentTypeData = {
+  type: PaymentType;
+  amount: number;
+  previousAmount: number | null;
+};
+
+/** Recurring expense payee */
+export type RecurringPayee = {
+  id: string;
+  name: string;
+  amount: number;
+  icon: string;
+};
+
+/** Frequent app */
+export type FrequentApp = {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  totalSpend: number;
+  previousSpend: number | null;
+  txCount: number;
+};
+
+/** Sample recurring expenses data by month */
+export const RECURRING_EXPENSES: Record<MonthKey, RecurringPayee[]> = {
+  apr2026: [
+    { id: "dad", name: "Dad", amount: 20000, icon: "user" },
+    { id: "owner", name: "House Owner", amount: 40000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 9000, icon: "utensils" },
+    { id: "maid", name: "Maid", amount: 3500, icon: "sparkles" },
+    { id: "loan", name: "Loan EMI", amount: 20000, icon: "bank" },
+    { id: "invest", name: "Investment SIP", amount: 50000, icon: "trending" },
+  ],
+  mar2026: [
+    { id: "dad", name: "Dad", amount: 20000, icon: "user" },
+    { id: "owner", name: "House Owner", amount: 40000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 9000, icon: "utensils" },
+    { id: "maid", name: "Maid", amount: 3500, icon: "sparkles" },
+    { id: "loan", name: "Loan EMI", amount: 20000, icon: "bank" },
+    { id: "invest", name: "Investment SIP", amount: 50000, icon: "trending" },
+  ],
+  feb2026: [
+    { id: "dad", name: "Dad", amount: 18000, icon: "user" },
+    { id: "owner", name: "House Owner", amount: 40000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 8500, icon: "utensils" },
+    { id: "maid", name: "Maid", amount: 3500, icon: "sparkles" },
+    { id: "loan", name: "Loan EMI", amount: 20000, icon: "bank" },
+    { id: "invest", name: "Investment SIP", amount: 45000, icon: "trending" },
+  ],
+  jan2026: [
+    { id: "dad", name: "Dad", amount: 15000, icon: "user" },
+    { id: "owner", name: "House Owner", amount: 40000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 8000, icon: "utensils" },
+    { id: "maid", name: "Maid", amount: 3000, icon: "sparkles" },
+    { id: "loan", name: "Loan EMI", amount: 20000, icon: "bank" },
+  ],
+  dec2025: [
+    { id: "dad", name: "Dad", amount: 15000, icon: "user" },
+    { id: "owner", name: "House Owner", amount: 38000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 8000, icon: "utensils" },
+    { id: "maid", name: "Maid", amount: 3000, icon: "sparkles" },
+  ],
+  nov2025: [
+    { id: "owner", name: "House Owner", amount: 38000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 7500, icon: "utensils" },
+    { id: "maid", name: "Maid", amount: 3000, icon: "sparkles" },
+  ],
+  oct2025: [
+    { id: "owner", name: "House Owner", amount: 38000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 7500, icon: "utensils" },
+  ],
+  sep2025: [
+    { id: "owner", name: "House Owner", amount: 35000, icon: "home" },
+  ],
+  aug2025: [],
+  jul2025: [],
+  jun2025: [],
+  may2025: [],
+};
+
+/** Get frequent apps from transactions */
+export function getFrequentApps(monthKey: MonthKey): FrequentApp[] {
+  const txMap = TRANSACTIONS_BY_MONTH[monthKey];
+  const appMap: Record<string, { name: string; total: number; count: number }> = {};
+  
+  // Aggregate by merchant
+  for (const slug of CATEGORY_ORDER) {
+    for (const tx of txMap[slug]) {
+      const name = tx.merchant;
+      if (!appMap[name]) {
+        appMap[name] = { name, total: 0, count: 0 };
+      }
+      appMap[name].total += tx.amount;
+      appMap[name].count += 1;
+    }
+  }
+  
+  // Get previous month data for comparison
+  const prevKey = getPreviousMonthKey(monthKey);
+  const prevAppMap: Record<string, number> = {};
+  
+  if (prevKey) {
+    const prevTxMap = TRANSACTIONS_BY_MONTH[prevKey];
+    for (const slug of CATEGORY_ORDER) {
+      for (const tx of prevTxMap[slug]) {
+        const name = tx.merchant;
+        if (!prevAppMap[name]) {
+          prevAppMap[name] = 0;
+        }
+        prevAppMap[name] += tx.amount;
+      }
+    }
+  }
+  
+  // Convert to array and sort by count (frequency)
+  const apps = Object.entries(appMap)
+    .map(([id, data]) => ({
+      id,
+      name: data.name,
+      icon: getAppIcon(data.name),
+      color: getAppColor(data.name),
+      totalSpend: data.total,
+      previousSpend: prevKey ? (prevAppMap[data.name] ?? 0) : null,
+      txCount: data.count,
+    }))
+    .sort((a, b) => b.txCount - a.txCount)
+    .slice(0, 5); // Top 5
+  
+  return apps;
+}
+
+function getAppIcon(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes("blinkit")) return "zap";
+  if (lower.includes("swiggy")) return "utensils";
+  if (lower.includes("uber") || lower.includes("ola") || lower.includes("rapido")) return "car";
+  if (lower.includes("amazon")) return "package";
+  if (lower.includes("flipkart")) return "shopping-bag";
+  if (lower.includes("zomato")) return "utensils";
+  if (lower.includes("bigbasket") || lower.includes("jiomart") || lower.includes("dmart")) return "shopping-cart";
+  return "store";
+}
+
+function getAppColor(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes("blinkit")) return "#F8C023";
+  if (lower.includes("swiggy")) return "#FC8019";
+  if (lower.includes("uber")) return "#000000";
+  if (lower.includes("amazon")) return "#FF9900";
+  if (lower.includes("flipkart")) return "#2874F0";
+  if (lower.includes("zomato")) return "#E23744";
+  if (lower.includes("bigbasket")) return "#84C225";
+  return "#64748B";
+}
+
+/** Get payment type breakdown */
+export function getPaymentTypeBreakdown(monthKey: MonthKey): PaymentTypeData[] {
+  const txMap = TRANSACTIONS_BY_MONTH[monthKey];
+  const totals: Record<PaymentType, number> = {
+    upi: 0,
+    credit: 0,
+    transfer: 0,
+    debit: 0,
+  };
+  
+  for (const slug of CATEGORY_ORDER) {
+    for (const tx of txMap[slug]) {
+      if (tx.channel === "UPI") {
+        totals.upi += tx.amount;
+      } else if (tx.channel === "Card") {
+        // Split cards - assume 60% credit, 40% debit for demo
+        totals.credit += Math.round(tx.amount * 0.6);
+        totals.debit += Math.round(tx.amount * 0.4);
+      } else if (tx.channel === "Net Banking") {
+        totals.transfer += tx.amount;
+      }
+    }
+  }
+  
+  // Get previous month for comparison
+  const prevKey = getPreviousMonthKey(monthKey);
+  let prevTotals: Record<PaymentType, number> | null = null;
+  
+  if (prevKey) {
+    const prevTxMap = TRANSACTIONS_BY_MONTH[prevKey];
+    prevTotals = { upi: 0, credit: 0, transfer: 0, debit: 0 };
+    
+    for (const slug of CATEGORY_ORDER) {
+      for (const tx of prevTxMap[slug]) {
+        if (tx.channel === "UPI") {
+          prevTotals.upi += tx.amount;
+        } else if (tx.channel === "Card") {
+          prevTotals.credit += Math.round(tx.amount * 0.6);
+          prevTotals.debit += Math.round(tx.amount * 0.4);
+        } else if (tx.channel === "Net Banking") {
+          prevTotals.transfer += tx.amount;
+        }
+      }
+    }
+  }
+  
+  return [
+    { type: "upi" as PaymentType, amount: totals.upi, previousAmount: prevTotals?.upi ?? null },
+    { type: "credit" as PaymentType, amount: totals.credit, previousAmount: prevTotals?.credit ?? null },
+    { type: "transfer" as PaymentType, amount: totals.transfer, previousAmount: prevTotals?.transfer ?? null },
+    { type: "debit" as PaymentType, amount: totals.debit, previousAmount: prevTotals?.debit ?? null },
+  ];
+}
+
+/** Get recurring expenses for a month */
+export function getRecurringExpenses(monthKey: MonthKey): { payees: RecurringPayee[]; total: number } {
+  const payees = RECURRING_EXPENSES[monthKey] || [];
+  const total = payees.reduce((sum, p) => sum + p.amount, 0);
+  return { payees, total };
+}
+
+/** Time filter for spend overview */
+export type TimeFilter = "this-week" | "this-month" | "last-3-months" | "custom";
+
+export const TIME_FILTERS: { key: TimeFilter; label: string }[] = [
+  { key: "this-week", label: "This Week" },
+  { key: "this-month", label: "This Month" },
+  { key: "last-3-months", label: "Last 3 Months" },
+  { key: "custom", label: "Custom" },
+];
+
+/** Get aggregated spend data for a time filter */
+export function getFilteredSpendData(filter: TimeFilter, monthKey: MonthKey = DEFAULT_MONTH): {
+  total: number;
+  categories: Record<CategorySlug, number>;
+  transactions: Record<CategorySlug, TxRow[]>;
+  label: string;
+  comparisonLabel: string | null;
+  previousTotal: number | null;
+} {
+  if (filter === "this-week") {
+    // Week 4 of the current month (last week)
+    const snapshot = getWeeklySpendSnapshot(monthKey, 4);
+    const prevSnapshot = getWeeklySpendSnapshot(monthKey, 3);
+    return {
+      total: snapshot.total,
+      categories: snapshot.categories,
+      transactions: snapshot.transactions,
+      label: "This Week",
+      comparisonLabel: "Last Week",
+      previousTotal: prevSnapshot.total,
+    };
+  }
+  
+  if (filter === "this-month") {
+    const snapshot = getSpendSnapshot(monthKey);
+    const prevKey = getPreviousMonthKey(monthKey);
+    const prevSnapshot = prevKey ? getSpendSnapshot(prevKey) : null;
+    return {
+      total: snapshot.total,
+      categories: snapshot.categories,
+      transactions: snapshot.transactions,
+      label: snapshot.monthLabel,
+      comparisonLabel: prevSnapshot?.monthLabel ?? null,
+      previousTotal: prevSnapshot?.total ?? null,
+    };
+  }
+  
+  if (filter === "last-3-months") {
+    // Aggregate last 3 months
+    const monthIdx = MONTH_KEYS.indexOf(monthKey);
+    const monthsToAggregate = MONTH_KEYS.slice(Math.max(0, monthIdx - 2), monthIdx + 1);
+    
+    const categories = {} as Record<CategorySlug, number>;
+    const transactions = {} as Record<CategorySlug, TxRow[]>;
+    for (const slug of CATEGORY_ORDER) {
+      categories[slug] = 0;
+      transactions[slug] = [];
+    }
+    
+    for (const mk of monthsToAggregate) {
+      const snap = getSpendSnapshot(mk as MonthKey);
+      for (const slug of CATEGORY_ORDER) {
+        categories[slug] += snap.categories[slug];
+        transactions[slug] = [...transactions[slug], ...snap.transactions[slug]];
+      }
+    }
+    
+    const total = CATEGORY_ORDER.reduce((sum, k) => sum + categories[k], 0);
+    
+    // Previous 3 months for comparison
+    const prevMonths = MONTH_KEYS.slice(Math.max(0, monthIdx - 5), Math.max(0, monthIdx - 2));
+    let prevTotal: number | null = null;
+    if (prevMonths.length > 0) {
+      prevTotal = 0;
+      for (const mk of prevMonths) {
+        const snap = getSpendSnapshot(mk as MonthKey);
+        prevTotal += snap.total;
+      }
+    }
+    
+    return {
+      total,
+      categories,
+      transactions,
+      label: "Last 3 Months",
+      comparisonLabel: prevTotal !== null ? "Prior 3 Months" : null,
+      previousTotal: prevTotal,
+    };
+  }
+  
+  // custom - same as this-month for now
+  const snapshot = getSpendSnapshot(monthKey);
+  return {
+    total: snapshot.total,
+    categories: snapshot.categories,
+    transactions: snapshot.transactions,
+    label: snapshot.monthLabel,
+    comparisonLabel: null,
+    previousTotal: null,
+  };
+}
+
+/** Find new expense categories (present this period, not in previous) */
+export function getNewExpenseCategories(filter: TimeFilter, monthKey: MonthKey = DEFAULT_MONTH): CategorySlug[] {
+  const current = getFilteredSpendData(filter, monthKey);
+  
+  // Get previous period data
+  let prevCategories: Record<CategorySlug, number> | null = null;
+  
+  if (filter === "this-week") {
+    const prevWeek = getWeeklySpendSnapshot(monthKey, 3);
+    prevCategories = prevWeek.categories;
+  } else if (filter === "this-month") {
+    const prevKey = getPreviousMonthKey(monthKey);
+    if (prevKey) {
+      const prevSnap = getSpendSnapshot(prevKey);
+      prevCategories = prevSnap.categories;
+    }
+  }
+  
+  if (!prevCategories) return [];
+  
+  return CATEGORY_ORDER.filter(
+    (slug) => current.categories[slug] > 0 && prevCategories![slug] === 0
+  );
+}
