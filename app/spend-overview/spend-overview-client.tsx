@@ -608,25 +608,47 @@ export function SpendOverviewClient({
             <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
               Frequent Used Apps
             </h2>
-            <div className={`overflow-hidden ${spendCardClass} p-4`} style={spendCardShadow}>
-              <div className="flex flex-wrap gap-3">
-                {frequentApps.map((app) => (
-                  <div
-                    key={app.id}
-                    className="flex items-center gap-2 rounded-full bg-zinc-50 px-3 py-2"
-                  >
-                    <span
-                      className="flex h-7 w-7 items-center justify-center rounded-full"
-                      style={{ backgroundColor: `${app.color}15` }}
-                    >
-                      <AppIcon icon={app.icon} color={app.color} />
-                    </span>
-                    <span className="text-sm font-medium text-zinc-700">
-                      {app.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
+            <div className={`overflow-hidden ${spendCardClass}`} style={spendCardShadow}>
+              <ul className="divide-y divide-zinc-100">
+                {frequentApps.map((app) => {
+                  const trend = app.previousSpend !== null ? computeMomChange(app.totalSpend, app.previousSpend) : null;
+                  return (
+                    <li key={app.id} className="flex items-center gap-3 px-4 py-3">
+                      <span
+                        className="flex h-9 w-9 items-center justify-center rounded-full"
+                        style={{ backgroundColor: `${app.color}15` }}
+                      >
+                        <AppIcon icon={app.icon} color={app.color} />
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-zinc-800 truncate">
+                          {app.name}
+                        </p>
+                        <p className="text-xs text-zinc-500">
+                          {app.txCount} transaction{app.txCount !== 1 ? "s" : ""}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold tabular-nums text-zinc-900">
+                          {formatInr(app.totalSpend)}
+                        </p>
+                        {trend && trend.hasPrevious && trend.direction !== "flat" && (
+                          <p
+                            className={`text-[11px] font-semibold tabular-nums ${
+                              trend.direction === "up" ? "text-amber-600" : "text-emerald-600"
+                            }`}
+                          >
+                            {trend.direction === "up" ? "↑" : "↓"}{formatMomPct(trend.pct)}%
+                          </p>
+                        )}
+                        {trend && trend.variant === "new" && (
+                          <span className="text-[10px] font-medium text-zinc-500">New</span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           </section>
         )}

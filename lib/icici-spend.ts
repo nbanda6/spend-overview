@@ -878,6 +878,7 @@ export type FrequentApp = {
   icon: string;
   color: string;
   totalSpend: number;
+  previousSpend: number | null;
   txCount: number;
 };
 
@@ -955,6 +956,23 @@ export function getFrequentApps(monthKey: MonthKey): FrequentApp[] {
     }
   }
   
+  // Get previous month data for comparison
+  const prevKey = getPreviousMonthKey(monthKey);
+  const prevAppMap: Record<string, number> = {};
+  
+  if (prevKey) {
+    const prevTxMap = TRANSACTIONS_BY_MONTH[prevKey];
+    for (const slug of CATEGORY_ORDER) {
+      for (const tx of prevTxMap[slug]) {
+        const name = tx.merchant;
+        if (!prevAppMap[name]) {
+          prevAppMap[name] = 0;
+        }
+        prevAppMap[name] += tx.amount;
+      }
+    }
+  }
+  
   // Convert to array and sort by count (frequency)
   const apps = Object.entries(appMap)
     .map(([id, data]) => ({
@@ -963,6 +981,7 @@ export function getFrequentApps(monthKey: MonthKey): FrequentApp[] {
       icon: getAppIcon(data.name),
       color: getAppColor(data.name),
       totalSpend: data.total,
+      previousSpend: prevKey ? (prevAppMap[data.name] ?? 0) : null,
       txCount: data.count,
     }))
     .sort((a, b) => b.txCount - a.txCount)
