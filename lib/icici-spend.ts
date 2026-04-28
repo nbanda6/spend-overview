@@ -1228,6 +1228,179 @@ export function getPaymentTypeBreakdown(
   ];
 }
 
+/** URL segment / drill-down for {@link PAYMENT_TYPE_META} */
+export function isPaymentTypeParam(s: string): s is PaymentType {
+  return s === "upi" || s === "credit" || s === "transfer" || s === "debit";
+}
+
+/** One row in the payment-mode transaction list (aligned with {@link getPaymentTypeBreakdown}). */
+export type PaymentModeListItem =
+  | {
+      kind: "purchase";
+      slug: CategorySlug;
+      monthKey: MonthKey;
+      txIndex: number;
+      merchant: string;
+      date: string;
+      channel?: TxRow["channel"];
+      initials: string;
+      /** Amount attributed to this payment bucket (card purchases are split 60/40 credit/debit). */
+      displayAmount: number;
+    }
+  | {
+      kind: "recurring";
+      monthKey: MonthKey;
+      payeeId: string;
+      name: string;
+      displayAmount: number;
+    };
+
+function cardBucketAmounts(amountScaled: number): { credit: number; debit: number } {
+  return {
+    credit: Math.round(amountScaled * 0.6),
+    debit: Math.round(amountScaled * 0.4),
+  };
+}
+
+/**
+ * Line items that make up the rolled-up payment totals for the same window as {@link getPaymentTypeBreakdown}.
+ */
+export function getTransactionsForPaymentType(
+  paymentType: PaymentType,
+  monthKey: MonthKey,
+  customRange: CustomDateRange | null,
+  filter: TimeFilter,
+): PaymentModeListItem[] {
+  const out: PaymentModeListItem[] = [];
+
+  const considerPurchase = (mk: MonthKey, slug: CategorySlug, tx: TxRow, txIndex: number) => {
+    const st = scaleTxRow(tx);
+    const amt = scaleTxAmount(tx.amount);
+    const ch = st.channel;
+
+    if (ch === "UPI") {
+      if (paymentType === "upi") {
+        out.push({
+          kind: "purchase",
+          slug,
+          monthKey: mk,
+          txIndex,
+          merchant: st.merchant,
+          date: st.date,
+          channel: st.channel,
+          initials: st.initials,
+          displayAmount: amt,
+        });
+      }
+      return;
+    }
+
+    if (ch === "Net Banking") {
+      if (paymentType === "transfer") {
+        out.push({
+          kind: "purchase",
+          slug,
+          monthKey: mk,
+          txIndex,
+          merchant: st.merchant,
+          date: st.date,
+          channel: st.channel,
+          initials: st.initials,
+          displayAmount: amt,
+        });
+      }
+      return;
+    }
+
+    if (ch === "Card") {
+      const { credit, debit } = cardBucketAmounts(amt);
+      if (paymentType === "credit" && credit > 0) {
+        out.push({
+          kind: "purchase",
+          slug,
+          monthKey: mk,
+          txIndex,
+          merchant: st.merchant,
+          date: st.date,
+          channel: st.channel,
+          initials: st.initials,
+          displayAmount: credit,
+        });
+      }
+      if (paymentType === "debit" && debit > 0) {
+        out.push({
+          kind: "purchase",
+          slug,
+          monthKey: mk,
+          txIndex,
+          merchant: st.merchant,
+          date: st.date,
+          channel: st.channel,
+          initials: st.initials,
+          displayAmount: debit,
+        });
+      }
+    }
+  };
+
+  if (customRange && isValidCustomRange(customRange)) {
+    for (const mk of MONTH_KEYS) {
+      const mkKey = mk as MonthKey;
+      for (const slug of CATEGORY_ORDER) {
+        const rows = TRANSACTIONS_BY_MONTH[mkKey][slug];
+        rows.forEach((tx, txIndex) => {
+          if (transactionInDateRange(tx, customRange)) {
+            considerPurchase(mkKey, slug, tx, txIndex);
+          }
+        });
+      }
+    }
+    for (const mk of MONTH_KEYS) {
+      const mkKey = mk as MonthKey;
+      if (!customRangeOverlapsMonth(mkKey, customRange)) continue;
+      for (const p of RECURRING_EXPENSES[mkKey] ?? []) {
+        if (p.paymentMode === paymentType) {
+          out.push({
+            kind: "recurring",
+            monthKey: mkKey,
+            payeeId: p.id,
+            name: p.name,
+            displayAmount: scaleRecurringAmount(p.amount),
+          });
+        }
+      }
+    }
+  } else {
+    const mkKey = monthKey;
+    for (const slug of CATEGORY_ORDER) {
+      const rows = TRANSACTIONS_BY_MONTH[mkKey][slug];
+      rows.forEach((tx, txIndex) => considerPurchase(mkKey, slug, tx, txIndex));
+    }
+    for (const mk of getRecurringMonthKeysForFilter(filter, monthKey)) {
+      for (const p of RECURRING_EXPENSES[mk] ?? []) {
+        if (p.paymentMode === paymentType) {
+          out.push({
+            kind: "recurring",
+            monthKey: mk,
+            payeeId: p.id,
+            name: p.name,
+            displayAmount: scaleRecurringAmount(p.amount),
+          });
+        }
+      }
+    }
+  }
+
+  const sortKey = (r: PaymentModeListItem): number => {
+    if (r.kind === "purchase") {
+      return parseTransactionDisplayDate(r.date)?.getTime() ?? 0;
+    }
+    return Date.parse(getMonthDateRangeIso(r.monthKey).end);
+  };
+
+  return out.sort((a, b) => sortKey(b) - sortKey(a));
+}
+
 /** Get recurring expenses for a month */
 export function getRecurringExpenses(monthKey: MonthKey): { payees: RecurringPayee[]; total: number } {
   const payees = (RECURRING_EXPENSES[monthKey] || []).map((p) => ({
