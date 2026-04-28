@@ -847,6 +847,215 @@ export const spendCardClass =
   "rounded-2xl border border-zinc-200/90 bg-white shadow-sm";
 export const spendCardShadow = { boxShadow: "0 4px 14px rgba(0,0,0,0.06)" } as const;
 
+/** Payment types breakdown */
+export type PaymentType = "upi" | "credit" | "transfer" | "debit";
+
+export const PAYMENT_TYPE_META: Record<PaymentType, { label: string; icon: string }> = {
+  upi: { label: "UPI", icon: "upi" },
+  credit: { label: "Credit Card", icon: "credit" },
+  transfer: { label: "Transfer", icon: "transfer" },
+  debit: { label: "Debit Card", icon: "debit" },
+};
+
+export type PaymentTypeData = {
+  type: PaymentType;
+  amount: number;
+  previousAmount: number | null;
+};
+
+/** Recurring expense payee */
+export type RecurringPayee = {
+  id: string;
+  name: string;
+  amount: number;
+  icon: string;
+};
+
+/** Frequent app */
+export type FrequentApp = {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  totalSpend: number;
+  txCount: number;
+};
+
+/** Sample recurring expenses data by month */
+export const RECURRING_EXPENSES: Record<MonthKey, RecurringPayee[]> = {
+  apr2026: [
+    { id: "dad", name: "Dad", amount: 20000, icon: "user" },
+    { id: "owner", name: "House Owner", amount: 40000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 9000, icon: "utensils" },
+    { id: "maid", name: "Maid", amount: 3500, icon: "sparkles" },
+    { id: "loan", name: "Loan EMI", amount: 20000, icon: "bank" },
+    { id: "invest", name: "Investment SIP", amount: 50000, icon: "trending" },
+  ],
+  mar2026: [
+    { id: "dad", name: "Dad", amount: 20000, icon: "user" },
+    { id: "owner", name: "House Owner", amount: 40000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 9000, icon: "utensils" },
+    { id: "maid", name: "Maid", amount: 3500, icon: "sparkles" },
+    { id: "loan", name: "Loan EMI", amount: 20000, icon: "bank" },
+    { id: "invest", name: "Investment SIP", amount: 50000, icon: "trending" },
+  ],
+  feb2026: [
+    { id: "dad", name: "Dad", amount: 18000, icon: "user" },
+    { id: "owner", name: "House Owner", amount: 40000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 8500, icon: "utensils" },
+    { id: "maid", name: "Maid", amount: 3500, icon: "sparkles" },
+    { id: "loan", name: "Loan EMI", amount: 20000, icon: "bank" },
+    { id: "invest", name: "Investment SIP", amount: 45000, icon: "trending" },
+  ],
+  jan2026: [
+    { id: "dad", name: "Dad", amount: 15000, icon: "user" },
+    { id: "owner", name: "House Owner", amount: 40000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 8000, icon: "utensils" },
+    { id: "maid", name: "Maid", amount: 3000, icon: "sparkles" },
+    { id: "loan", name: "Loan EMI", amount: 20000, icon: "bank" },
+  ],
+  dec2025: [
+    { id: "dad", name: "Dad", amount: 15000, icon: "user" },
+    { id: "owner", name: "House Owner", amount: 38000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 8000, icon: "utensils" },
+    { id: "maid", name: "Maid", amount: 3000, icon: "sparkles" },
+  ],
+  nov2025: [
+    { id: "owner", name: "House Owner", amount: 38000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 7500, icon: "utensils" },
+    { id: "maid", name: "Maid", amount: 3000, icon: "sparkles" },
+  ],
+  oct2025: [
+    { id: "owner", name: "House Owner", amount: 38000, icon: "home" },
+    { id: "cook", name: "Cook", amount: 7500, icon: "utensils" },
+  ],
+  sep2025: [
+    { id: "owner", name: "House Owner", amount: 35000, icon: "home" },
+  ],
+  aug2025: [],
+  jul2025: [],
+  jun2025: [],
+  may2025: [],
+};
+
+/** Get frequent apps from transactions */
+export function getFrequentApps(monthKey: MonthKey): FrequentApp[] {
+  const txMap = TRANSACTIONS_BY_MONTH[monthKey];
+  const appMap: Record<string, { name: string; total: number; count: number }> = {};
+  
+  // Aggregate by merchant
+  for (const slug of CATEGORY_ORDER) {
+    for (const tx of txMap[slug]) {
+      const name = tx.merchant;
+      if (!appMap[name]) {
+        appMap[name] = { name, total: 0, count: 0 };
+      }
+      appMap[name].total += tx.amount;
+      appMap[name].count += 1;
+    }
+  }
+  
+  // Convert to array and sort by count (frequency)
+  const apps = Object.entries(appMap)
+    .map(([id, data]) => ({
+      id,
+      name: data.name,
+      icon: getAppIcon(data.name),
+      color: getAppColor(data.name),
+      totalSpend: data.total,
+      txCount: data.count,
+    }))
+    .sort((a, b) => b.txCount - a.txCount)
+    .slice(0, 5); // Top 5
+  
+  return apps;
+}
+
+function getAppIcon(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes("blinkit")) return "zap";
+  if (lower.includes("swiggy")) return "utensils";
+  if (lower.includes("uber") || lower.includes("ola") || lower.includes("rapido")) return "car";
+  if (lower.includes("amazon")) return "package";
+  if (lower.includes("flipkart")) return "shopping-bag";
+  if (lower.includes("zomato")) return "utensils";
+  if (lower.includes("bigbasket") || lower.includes("jiomart") || lower.includes("dmart")) return "shopping-cart";
+  return "store";
+}
+
+function getAppColor(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes("blinkit")) return "#F8C023";
+  if (lower.includes("swiggy")) return "#FC8019";
+  if (lower.includes("uber")) return "#000000";
+  if (lower.includes("amazon")) return "#FF9900";
+  if (lower.includes("flipkart")) return "#2874F0";
+  if (lower.includes("zomato")) return "#E23744";
+  if (lower.includes("bigbasket")) return "#84C225";
+  return "#64748B";
+}
+
+/** Get payment type breakdown */
+export function getPaymentTypeBreakdown(monthKey: MonthKey): PaymentTypeData[] {
+  const txMap = TRANSACTIONS_BY_MONTH[monthKey];
+  const totals: Record<PaymentType, number> = {
+    upi: 0,
+    credit: 0,
+    transfer: 0,
+    debit: 0,
+  };
+  
+  for (const slug of CATEGORY_ORDER) {
+    for (const tx of txMap[slug]) {
+      if (tx.channel === "UPI") {
+        totals.upi += tx.amount;
+      } else if (tx.channel === "Card") {
+        // Split cards - assume 60% credit, 40% debit for demo
+        totals.credit += Math.round(tx.amount * 0.6);
+        totals.debit += Math.round(tx.amount * 0.4);
+      } else if (tx.channel === "Net Banking") {
+        totals.transfer += tx.amount;
+      }
+    }
+  }
+  
+  // Get previous month for comparison
+  const prevKey = getPreviousMonthKey(monthKey);
+  let prevTotals: Record<PaymentType, number> | null = null;
+  
+  if (prevKey) {
+    const prevTxMap = TRANSACTIONS_BY_MONTH[prevKey];
+    prevTotals = { upi: 0, credit: 0, transfer: 0, debit: 0 };
+    
+    for (const slug of CATEGORY_ORDER) {
+      for (const tx of prevTxMap[slug]) {
+        if (tx.channel === "UPI") {
+          prevTotals.upi += tx.amount;
+        } else if (tx.channel === "Card") {
+          prevTotals.credit += Math.round(tx.amount * 0.6);
+          prevTotals.debit += Math.round(tx.amount * 0.4);
+        } else if (tx.channel === "Net Banking") {
+          prevTotals.transfer += tx.amount;
+        }
+      }
+    }
+  }
+  
+  return [
+    { type: "upi" as PaymentType, amount: totals.upi, previousAmount: prevTotals?.upi ?? null },
+    { type: "credit" as PaymentType, amount: totals.credit, previousAmount: prevTotals?.credit ?? null },
+    { type: "transfer" as PaymentType, amount: totals.transfer, previousAmount: prevTotals?.transfer ?? null },
+    { type: "debit" as PaymentType, amount: totals.debit, previousAmount: prevTotals?.debit ?? null },
+  ];
+}
+
+/** Get recurring expenses for a month */
+export function getRecurringExpenses(monthKey: MonthKey): { payees: RecurringPayee[]; total: number } {
+  const payees = RECURRING_EXPENSES[monthKey] || [];
+  const total = payees.reduce((sum, p) => sum + p.amount, 0);
+  return { payees, total };
+}
+
 /** Time filter for spend overview */
 export type TimeFilter = "this-week" | "this-month" | "last-3-months" | "custom";
 
