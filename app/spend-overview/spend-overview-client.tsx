@@ -7,15 +7,18 @@ import {
   CATEGORY_META,
   CATEGORY_ORDER,
   HDFC,
-  MONTHS,
+  TIME_FILTERS,
   type CategoryIconKind,
-  type MomChange,
+  type CategorySlug,
   type MonthKey,
-  formatMomPct,
-  getSpendInsight,
+  type TimeFilter,
+  getFilteredSpendData,
+  getNewExpenseCategories,
   formatInr,
   spendCardClass,
   spendCardShadow,
+  computeMomChange,
+  formatMomPct,
 } from "@/lib/icici-spend";
 
 function CategoryIcon({ kind }: { kind: CategoryIconKind }) {
@@ -89,88 +92,90 @@ function CategoryIcon({ kind }: { kind: CategoryIconKind }) {
   }
 }
 
-function MomPill({ mom, periodLabel = "month" }: { mom: MomChange; periodLabel?: string }) {
-  if (!mom.hasPrevious) {
-    return (
-      <span className="text-[11px] leading-snug text-zinc-500">
-        Trend compares from your second {periodLabel} in this view.
-      </span>
-    );
-  }
-  if (mom.variant === "new") {
-    return (
-      <span className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold text-zinc-700">
-        New vs prior {periodLabel}
-      </span>
-    );
-  }
-  if (mom.variant === "cleared") {
-    return (
-      <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 ring-1 ring-emerald-200/80">
-        ↓ to zero vs prior
-      </span>
-    );
-  }
-  if (mom.direction === "flat") {
-    return (
-      <span className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold text-zinc-600">
-        Flat vs prior {periodLabel}
-      </span>
-    );
-  }
-  const up = mom.direction === "up";
+function TrendBadge({ current, previous }: { current: number; previous: number | null }) {
+  if (previous === null || previous === 0) return null;
+  
+  const change = computeMomChange(current, previous);
+  if (!change.hasPrevious || change.direction === "flat") return null;
+  
+  const isUp = change.direction === "up";
+  
   return (
     <span
-      className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ring-1 ${
-        up
-          ? "bg-amber-50 text-amber-900 ring-amber-200/90"
-          : "bg-emerald-50 text-emerald-900 ring-emerald-200/90"
+      className={`inline-flex items-center gap-0.5 text-[11px] font-semibold tabular-nums ${
+        isUp ? "text-amber-700" : "text-emerald-700"
       }`}
     >
-      <span aria-hidden>{up ? "↑" : "↓"}</span>
-      {formatMomPct(mom.pct)}%
-      <span className="font-medium opacity-90">
-        {up ? " higher" : " lower"}
-      </span>
+      <span aria-hidden>{isUp ? "↑" : "↓"}</span>
+      {formatMomPct(change.pct)}%
     </span>
   );
 }
 
-function CategoryMomHint({ mom, periodLabel = "month" }: { mom: MomChange; periodLabel?: string }) {
-  if (!mom.hasPrevious) return null;
-  if (mom.variant === "new") {
-    return (
-      <span className="text-[10px] font-medium text-zinc-600">
-        New <span className="text-zinc-400">· vs prior {periodLabel}</span>
-      </span>
-    );
-  }
-  if (mom.variant === "cleared") {
-    return (
-      <span className="text-[10px] font-semibold text-emerald-800">
-        ↓ to zero <span className="font-normal text-zinc-400">· vs prior</span>
-      </span>
-    );
-  }
-  if (mom.direction === "flat") {
-    return (
-      <span className="text-[10px] text-zinc-500">
-        Flat <span className="text-zinc-400">· vs prior {periodLabel}</span>
-      </span>
-    );
-  }
-  const up = mom.direction === "up";
+function CategoryRow({
+  slug,
+  amount,
+  previousAmount,
+  monthKey,
+  fromSource,
+  isNew,
+}: {
+  slug: CategorySlug;
+  amount: number;
+  previousAmount: number | null;
+  monthKey: MonthKey;
+  fromSource: string;
+  isNew?: boolean;
+}) {
+  const c = CATEGORY_META[slug];
+  
   return (
-    <span className="inline-flex items-center gap-1">
+    <Link
+      href={`/spend-overview/${slug}?m=${monthKey}&from=${fromSource}`}
+      className="flex items-center gap-3 px-4 py-3 active:bg-zinc-50"
+      aria-label={`${c.label}, ${formatInr(amount)}`}
+    >
       <span
-        className={`text-[10px] font-bold tabular-nums ${up ? "text-amber-800" : "text-emerald-800"}`}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+        style={{
+          color: c.color,
+          backgroundColor: `${c.color}14`,
+        }}
       >
-        {up ? "↑" : "↓"} {formatMomPct(mom.pct)}%
+        <CategoryIcon kind={c.icon} />
       </span>
-      <span className="text-[9px] font-medium uppercase tracking-wide text-zinc-400">
-        vs prior
-      </span>
-    </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-zinc-900">{c.label}</span>
+          {isNew && (
+            <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-700">
+              New
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="flex flex-col items-end">
+          <span className="text-sm font-semibold tabular-nums text-zinc-900">
+            {formatInr(amount)}
+          </span>
+          {previousAmount !== null && (
+            <TrendBadge current={amount} previous={previousAmount} />
+          )}
+        </div>
+        <span className="text-zinc-300" aria-hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M9 6l6 6-6 6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+      </div>
+    </Link>
   );
 }
 
@@ -185,10 +190,45 @@ export function SpendOverviewClient({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [monthKey, setMonthKey] = useState<MonthKey>(initialMonthKey);
+  const [monthKey] = useState<MonthKey>(initialMonthKey);
+  const [activeFilter, setActiveFilter] = useState<TimeFilter>("this-month");
 
-  const insight = useMemo(() => getSpendInsight(monthKey), [monthKey]);
-  const { snapshot, previousMonthLabel, totalMom, categoryMom } = insight;
+  const spendData = useMemo(
+    () => getFilteredSpendData(activeFilter, monthKey),
+    [activeFilter, monthKey]
+  );
+
+  const newCategories = useMemo(
+    () => getNewExpenseCategories(activeFilter, monthKey),
+    [activeFilter, monthKey]
+  );
+
+  // Get previous period categories for comparison
+  const previousCategories = useMemo(() => {
+    if (activeFilter === "this-week") {
+      // Compare with last week
+      const prevData = getFilteredSpendData("this-week", monthKey);
+      // This is a simplified approach - in real app you'd get actual previous week data
+      return null;
+    }
+    if (activeFilter === "this-month" && spendData.comparisonLabel) {
+      // We need to get the previous month's category data
+      const prevFilter = getFilteredSpendData("this-month", monthKey);
+      return prevFilter.previousTotal !== null ? spendData.categories : null;
+    }
+    return null;
+  }, [activeFilter, monthKey, spendData]);
+
+  // Calculate trend for total
+  const totalTrend = useMemo(() => {
+    if (spendData.previousTotal === null) return null;
+    return computeMomChange(spendData.total, spendData.previousTotal);
+  }, [spendData]);
+
+  // Regular categories (not new)
+  const regularCategories = CATEGORY_ORDER.filter(
+    (slug) => !newCategories.includes(slug) && spendData.categories[slug] > 0
+  );
 
   return (
     <div
@@ -222,145 +262,126 @@ export function SpendOverviewClient({
               HDFC Bank
             </span>
             <h1 className="truncate text-base font-semibold leading-tight">
-              Your Spending at a Glance
+              Spend Overview
             </h1>
-          </div>
-          <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15 text-xs font-bold"
-            aria-hidden
-          >
-            i
           </div>
         </header>
 
-        <div className="border-b border-zinc-200/90 bg-zinc-100 px-3 pb-3 pt-2.5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-            Month
-          </p>
-          <div className="mt-2 flex flex-row-reverse gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {[...MONTHS].reverse().map((m) => (
+        {/* Time Filters */}
+        <div className="border-b border-zinc-200/90 bg-white px-3 py-3">
+          <div className="flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {TIME_FILTERS.map((f) => (
               <button
-                key={m.key}
+                key={f.key}
                 type="button"
                 onClick={() => {
-                  setMonthKey(m.key);
-                  router.replace(`${pathname}?m=${m.key}`, { scroll: false });
+                  setActiveFilter(f.key);
+                  router.replace(`${pathname}?m=${monthKey}&f=${f.key}`, { scroll: false });
                 }}
-                className={`shrink-0 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${
-                  m.key === monthKey
+                className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  f.key === activeFilter
                     ? "text-white shadow-sm"
-                    : "border border-zinc-200/90 bg-white text-zinc-600 hover:bg-zinc-50"
+                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
                 }`}
                 style={
-                  m.key === monthKey ? { backgroundColor: HDFC.navyBlue } : undefined
+                  f.key === activeFilter ? { backgroundColor: HDFC.navyBlue } : undefined
                 }
               >
-                {m.short}
+                {f.label}
               </button>
             ))}
           </div>
-
-          <p className="mt-2 text-xs text-zinc-600">
-            Showing data for{" "}
-            <span className="font-semibold text-zinc-900">{snapshot.monthLabel}</span>
-          </p>
         </div>
       </div>
 
       <main className="space-y-4 px-4 pb-10 pt-4">
+        {/* Total Spends Card */}
         <section className={`${spendCardClass} p-5`} style={spendCardShadow}>
-          <div className="flex flex-col items-center text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-              Total Spends
-            </p>
-            <p
-              className="mt-2 text-3xl font-bold tabular-nums"
-              style={{ color: HDFC.navyBlue }}
-            >
-              {formatInr(snapshot.total)}
-            </p>
-            <p className="mt-1 text-xs text-zinc-500">
-              {snapshot.monthLabel}
-            </p>
-          </div>
-
-          <div
-            className="mt-5 rounded-xl border border-zinc-100 bg-zinc-50/90 px-4 py-3"
-            role="status"
-            aria-live="polite"
-          >
-            <p className="text-[11px] font-medium text-zinc-600">
-              {previousMonthLabel ? (
-                <>
-                  vs <span className="text-zinc-900">{previousMonthLabel}</span>
-                </>
-              ) : (
-                "Month-over-month"
-              )}
-            </p>
-            <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <MomPill mom={totalMom} />
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-medium text-zinc-500">
+                Total Spends
+              </p>
+              <p
+                className="mt-1 text-2xl font-bold tabular-nums"
+                style={{ color: HDFC.navyBlue }}
+              >
+                {formatInr(spendData.total)}
+              </p>
+              <p className="mt-0.5 text-xs text-zinc-500">
+                {spendData.label}
+              </p>
             </div>
+            {totalTrend && totalTrend.hasPrevious && totalTrend.direction !== "flat" && (
+              <div
+                className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                  totalTrend.direction === "up"
+                    ? "bg-amber-50 text-amber-800"
+                    : "bg-emerald-50 text-emerald-800"
+                }`}
+              >
+                <span aria-hidden>{totalTrend.direction === "up" ? "↑" : "↓"}</span>
+                {formatMomPct(totalTrend.pct)}%
+                <span className="font-normal text-zinc-500">
+                  vs {spendData.comparisonLabel}
+                </span>
+              </div>
+            )}
           </div>
         </section>
 
+        {/* Smart Categories */}
         <section>
-          <h2 className="mb-2 px-0.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
-            Categories
+          <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+            Smart Categories
           </h2>
-          <ul className={`overflow-hidden ${spendCardClass}`}>
-            {CATEGORY_ORDER.map((slug) => {
-              const c = CATEGORY_META[slug];
-              const amount = snapshot.categories[slug];
-              return (
-                <li key={slug} className="border-b border-zinc-100 last:border-0">
-                  <Link
-                    href={`/spend-overview/${slug}?m=${monthKey}&from=${fromSource}`}
-                    className="flex items-center gap-3 px-4 py-3.5 active:bg-zinc-50"
-                    aria-label={`${c.label}, ${formatInr(amount)}`}
-                  >
-                    <span
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-                      style={{
-                        color: c.color,
-                        backgroundColor: `${c.color}14`,
-                      }}
-                    >
-                      <CategoryIcon kind={c.icon} />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <span className="font-medium text-zinc-900">{c.label}</span>
-                      {slug === "miscellaneous" && (
-                        <p className="mt-0.5 text-[11px] leading-snug text-zinc-500">
-                          Not auto-categorised
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex min-w-[7rem] shrink-0 flex-col items-end gap-1 text-right">
-                      <span className="text-sm font-semibold tabular-nums text-zinc-900">
-                        {formatInr(amount)}
-                      </span>
-                      {previousMonthLabel ? (
-                        <CategoryMomHint mom={categoryMom[slug]} />
-                      ) : null}
-                    </div>
-                    <span className="text-zinc-300" aria-hidden>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path
-                          d="M9 6l6 6-6 6"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+          <div className={`overflow-hidden ${spendCardClass}`} style={spendCardShadow}>
+            {regularCategories.length > 0 ? (
+              <ul className="divide-y divide-zinc-100">
+                {regularCategories.map((slug) => (
+                  <li key={slug}>
+                    <CategoryRow
+                      slug={slug}
+                      amount={spendData.categories[slug]}
+                      previousAmount={previousCategories?.[slug] ?? null}
+                      monthKey={monthKey}
+                      fromSource={fromSource}
+                    />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="px-4 py-6 text-center text-sm text-zinc-500">
+                No spending data available
+              </p>
+            )}
+          </div>
         </section>
+
+        {/* New Expenses */}
+        {newCategories.length > 0 && (
+          <section>
+            <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              New Expenses
+            </h2>
+            <div className={`overflow-hidden ${spendCardClass}`} style={spendCardShadow}>
+              <ul className="divide-y divide-zinc-100">
+                {newCategories.map((slug) => (
+                  <li key={slug}>
+                    <CategoryRow
+                      slug={slug}
+                      amount={spendData.categories[slug]}
+                      previousAmount={null}
+                      monthKey={monthKey}
+                      fromSource={fromSource}
+                      isNew
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );

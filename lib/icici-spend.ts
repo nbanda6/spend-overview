@@ -846,3 +846,130 @@ export function isCategorySlug(s: string): s is CategorySlug {
 export const spendCardClass =
   "rounded-2xl border border-zinc-200/90 bg-white shadow-sm";
 export const spendCardShadow = { boxShadow: "0 4px 14px rgba(0,0,0,0.06)" } as const;
+
+/** Time filter for spend overview */
+export type TimeFilter = "this-week" | "this-month" | "last-3-months" | "custom";
+
+export const TIME_FILTERS: { key: TimeFilter; label: string }[] = [
+  { key: "this-week", label: "This Week" },
+  { key: "this-month", label: "This Month" },
+  { key: "last-3-months", label: "Last 3 Months" },
+  { key: "custom", label: "Custom" },
+];
+
+/** Get aggregated spend data for a time filter */
+export function getFilteredSpendData(filter: TimeFilter, monthKey: MonthKey = DEFAULT_MONTH): {
+  total: number;
+  categories: Record<CategorySlug, number>;
+  transactions: Record<CategorySlug, TxRow[]>;
+  label: string;
+  comparisonLabel: string | null;
+  previousTotal: number | null;
+} {
+  if (filter === "this-week") {
+    // Week 4 of the current month (last week)
+    const snapshot = getWeeklySpendSnapshot(monthKey, 4);
+    const prevSnapshot = getWeeklySpendSnapshot(monthKey, 3);
+    return {
+      total: snapshot.total,
+      categories: snapshot.categories,
+      transactions: snapshot.transactions,
+      label: "This Week",
+      comparisonLabel: "Last Week",
+      previousTotal: prevSnapshot.total,
+    };
+  }
+  
+  if (filter === "this-month") {
+    const snapshot = getSpendSnapshot(monthKey);
+    const prevKey = getPreviousMonthKey(monthKey);
+    const prevSnapshot = prevKey ? getSpendSnapshot(prevKey) : null;
+    return {
+      total: snapshot.total,
+      categories: snapshot.categories,
+      transactions: snapshot.transactions,
+      label: snapshot.monthLabel,
+      comparisonLabel: prevSnapshot?.monthLabel ?? null,
+      previousTotal: prevSnapshot?.total ?? null,
+    };
+  }
+  
+  if (filter === "last-3-months") {
+    // Aggregate last 3 months
+    const monthIdx = MONTH_KEYS.indexOf(monthKey);
+    const monthsToAggregate = MONTH_KEYS.slice(Math.max(0, monthIdx - 2), monthIdx + 1);
+    
+    const categories = {} as Record<CategorySlug, number>;
+    const transactions = {} as Record<CategorySlug, TxRow[]>;
+    for (const slug of CATEGORY_ORDER) {
+      categories[slug] = 0;
+      transactions[slug] = [];
+    }
+    
+    for (const mk of monthsToAggregate) {
+      const snap = getSpendSnapshot(mk as MonthKey);
+      for (const slug of CATEGORY_ORDER) {
+        categories[slug] += snap.categories[slug];
+        transactions[slug] = [...transactions[slug], ...snap.transactions[slug]];
+      }
+    }
+    
+    const total = CATEGORY_ORDER.reduce((sum, k) => sum + categories[k], 0);
+    
+    // Previous 3 months for comparison
+    const prevMonths = MONTH_KEYS.slice(Math.max(0, monthIdx - 5), Math.max(0, monthIdx - 2));
+    let prevTotal: number | null = null;
+    if (prevMonths.length > 0) {
+      prevTotal = 0;
+      for (const mk of prevMonths) {
+        const snap = getSpendSnapshot(mk as MonthKey);
+        prevTotal += snap.total;
+      }
+    }
+    
+    return {
+      total,
+      categories,
+      transactions,
+      label: "Last 3 Months",
+      comparisonLabel: prevTotal !== null ? "Prior 3 Months" : null,
+      previousTotal: prevTotal,
+    };
+  }
+  
+  // custom - same as this-month for now
+  const snapshot = getSpendSnapshot(monthKey);
+  return {
+    total: snapshot.total,
+    categories: snapshot.categories,
+    transactions: snapshot.transactions,
+    label: snapshot.monthLabel,
+    comparisonLabel: null,
+    previousTotal: null,
+  };
+}
+
+/** Find new expense categories (present this period, not in previous) */
+export function getNewExpenseCategories(filter: TimeFilter, monthKey: MonthKey = DEFAULT_MONTH): CategorySlug[] {
+  const current = getFilteredSpendData(filter, monthKey);
+  
+  // Get previous period data
+  let prevCategories: Record<CategorySlug, number> | null = null;
+  
+  if (filter === "this-week") {
+    const prevWeek = getWeeklySpendSnapshot(monthKey, 3);
+    prevCategories = prevWeek.categories;
+  } else if (filter === "this-month") {
+    const prevKey = getPreviousMonthKey(monthKey);
+    if (prevKey) {
+      const prevSnap = getSpendSnapshot(prevKey);
+      prevCategories = prevSnap.categories;
+    }
+  }
+  
+  if (!prevCategories) return [];
+  
+  return CATEGORY_ORDER.filter(
+    (slug) => current.categories[slug] > 0 && prevCategories![slug] === 0
+  );
+}
